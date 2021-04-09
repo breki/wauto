@@ -15,6 +15,19 @@ namespace TestHotkeys
         public Form1()
         {
             InitializeComponent();
+            
+            // GlobalHotKey.RegisterHotKey("Alt + Shift + S", DoSomething);
+            GlobalHotKey.RegisterHotKey("Win + A", DoSomethingElse);
+        }
+
+        private void DoSomething()
+        {
+            MessageBox.Show("Hello World", "Hello World");
+        }
+
+        private void DoSomethingElse()
+        {
+            MessageBox.Show("Notepad, eh?", "Notepad, eh?");
         }
     }
 }

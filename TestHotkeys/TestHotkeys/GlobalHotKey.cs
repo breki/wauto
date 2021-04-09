@@ -19,9 +19,9 @@ namespace TestHotkeys
             Action action)
         {
             var c = new KeyGestureConverter();
-            KeyGesture aKeyGesture =
+            KeyGesture keyGesture =
                 (KeyGesture) c.ConvertFrom(keyGestureString);
-            return RegisterHotKey(aKeyGesture.Modifiers, aKeyGesture.Key,
+            return RegisterHotKey(keyGesture.Modifiers, keyGesture.Key,
                 action);
         }
 
