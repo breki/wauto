@@ -1,0 +1,1 @@
+﻿- create a project that registers a global keyboard shortcut
