@@ -59,6 +59,8 @@
             <DependentUpon>Form1.cs</DependentUpon>
         </Compile>
         <Compile Include="GlobalHotKey.cs" />
+        <Compile Include="MyKeyboardHandler.cs" />
+        <Compile Include="NativeApi.cs" />
         <Compile Include="Program.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <EmbeddedResource Include="Properties\Resources.resx">

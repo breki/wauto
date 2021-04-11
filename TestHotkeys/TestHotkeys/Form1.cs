@@ -6,7 +6,8 @@ namespace TestHotkeys
 {
     public partial class Form1 : Form
     {
-        private KeyboardHookManager keyboardHookManager;
+        // private KeyboardHookManager keyboardHookManager;
+        private MyKeyboardHandler keyboardHandler;
         
         public Form1()
         {
@@ -15,36 +16,40 @@ namespace TestHotkeys
             // GlobalHotKey.RegisterHotKey("Alt + Shift + S", DoSomething);
             // GlobalHotKey.RegisterHotKey("Win + A", DoSomethingElse);
 
-            keyboardHookManager = new KeyboardHookManager();
-            keyboardHookManager.Start();
-            
-            keyboardHookManager.RegisterHotkey(0x60, () =>
-            {
-                DoSomething();
-            });
-
-            var modifiers = new[]
-            {
-                NonInvasiveKeyboardHookLibrary.ModifierKeys.WindowsKey
-            };
-            
-            keyboardHookManager.RegisterHotkey(
-                modifiers, 0x41, () =>
-            {
-                DoSomething();
-            });
+            // keyboardHookManager = new KeyboardHookManager();
+            // keyboardHookManager.Start();
+            //
+            // keyboardHookManager.RegisterHotkey(0x60, () =>
+            // {
+            //     DoSomething();
+            // });
+            //
+            // var modifiers = new[]
+            // {
+            //     NonInvasiveKeyboardHookLibrary.ModifierKeys.WindowsKey
+            // };
+            //
+            // keyboardHookManager.RegisterHotkey(
+            //     modifiers, 0x41, () =>
+            // {
+            //     DoSomething();
+            // });
 
             // keyboardHookManager.RegisterHotkey(
             //     NonInvasiveKeyboardHookLibrary.ModifierKeys.Control, 0x60, () =>
             // {
             //     DoSomething();
             // });
+
+            keyboardHandler = new MyKeyboardHandler();
+            keyboardHandler.Start();
         }
 
         protected override void OnClosed(EventArgs e)
         {
-            keyboardHookManager.UnregisterAll();
-            keyboardHookManager.Stop();
+            keyboardHandler.Stop();
+            // keyboardHookManager.UnregisterAll();
+            // keyboardHookManager.Stop();
             base.OnClosed(e);
         }
 
