@@ -15,6 +15,7 @@ namespace TestHotkeys
             
             // GlobalHotKey.RegisterHotKey("Alt + Shift + S", DoSomething);
             // GlobalHotKey.RegisterHotKey("Win + A", DoSomethingElse);
+            // GlobalHotKey.RegisterHotKey("Win + G", DoSomethingElse);
 
             // keyboardHookManager = new KeyboardHookManager();
             // keyboardHookManager.Start();
@@ -41,7 +42,7 @@ namespace TestHotkeys
             //     DoSomething();
             // });
 
-            keyboardHandler = new MyKeyboardHandler();
+            keyboardHandler = new MyKeyboardHandler(this.textBoxLog);
             keyboardHandler.Start();
         }
 
