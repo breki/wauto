@@ -1,9 +1,5 @@
-﻿- MyKeyboardHandler
-  - use our own logic for low-level capture (not `GlobalHotKey`)
-    - implement a currently pressed keyboard state structure
-    - based on that structure and keypress does event, find a shortcut
-    - if shortcut exists, do not call CallNextHookEx, instead return -1
-
-    - take the key handling code from KeyboardHookManager
-    - how to prevent the registered hotkey event bubbling forwards?
-    - why does the second stroke always get ignored?
+﻿- implement converting from string names of key combos to KeyCombo 
+  and vice versa
+- based on the currently pressed key combo, find a shortcut
+- investigate Maperitive UI test code for ways to automate things in Windows
+- consider moving to F#, if possible
