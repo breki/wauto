@@ -5,6 +5,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution Files", "{E362BC42-20F9-4A33-AD3E-42EC51B1C645}"
 ProjectSection(SolutionItems) = preProject
 	..\TODO.md = ..\TODO.md
+	..\.gitignore = ..\.gitignore
 EndProjectSection
 EndProject
 Global
