@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using NonInvasiveKeyboardHookLibrary;
 
 namespace TestHotkeys
 {
@@ -31,9 +32,35 @@ namespace TestHotkeys
                 var keyboardMessageStr =
                     Enum.GetName(typeof(NativeKeyboardMessage),
                         keyboardMessage);
+
+                KBDLLHOOKSTRUCT kbHookStruct =
+                    (KBDLLHOOKSTRUCT) Marshal.PtrToStructure(lParam,
+                        typeof(KBDLLHOOKSTRUCT));
                 
-                int vkCode = Marshal.ReadInt32(lParam);
-                textBoxLog.Text += " : " + keyboardMessageStr + " : " + vkCode;
+                uint vkCode = kbHookStruct.vkCode;
+
+                ModifierKeys modifierKey = 0;
+                switch (vkCode)
+                {
+                    case 160:
+                    case 161:
+                        modifierKey = ModifierKeys.Shift;
+                        break;
+                    case 162:
+                    case 163:
+                        modifierKey = ModifierKeys.Control;
+                        break;
+                    case 164:
+                    case 165:
+                        modifierKey = ModifierKeys.Alt;
+                        break;
+                    case 91:
+                        modifierKey = ModifierKeys.WindowsKey;
+                        break;
+                }
+
+                textBoxLog.Text += 
+                    " : " + modifierKey + " : " + keyboardMessageStr + " : " + vkCode;
             }
             
             // todo: add some custom logic here
