@@ -3,3 +3,4 @@
         - clean up resources properly
         - on icon click, activate the window
         - on window close, just hide it
+- can we introduce autoformatting of code?

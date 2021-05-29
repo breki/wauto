@@ -10,6 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="UIStuff.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
