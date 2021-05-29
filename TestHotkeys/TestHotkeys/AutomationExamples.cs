@@ -18,8 +18,10 @@ public static class AutomationExamples
                 logging.LogMessage($"Found element {name}");
                 
                 el.SetFocus();
-                Thread.Sleep(1000);
-                SendKeys.SendWait("i");
+                Thread.Sleep(250);
+                SendKeys.SendWait("+^A");
+                Thread.Sleep(250);
+                SendKeys.SendWait("gmail{ENTER}");
                 break;
             }
             // PrintGoogleChromeTabNames(el, logging);
