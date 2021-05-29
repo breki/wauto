@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
 using NonInvasiveKeyboardHookLibrary;
 
 namespace TestHotkeys
 {
     public class MyKeyboardHandler
     {
-        public MyKeyboardHandler(TextBox textBoxLog)
+        public MyKeyboardHandler(IAppLogging logging)
         {
-            this.textBoxLog = textBoxLog;
+            this.logging = logging;
         }
 
         public void Start()
@@ -27,7 +26,7 @@ namespace TestHotkeys
         {
             var forwardToNextHook = true;
             
-            textBoxLog.Text = nCode.ToString();
+            // logging.LogMessage(nCode.ToString());
             
             if (nCode >= 0)
             {
@@ -84,20 +83,21 @@ namespace TestHotkeys
                         break;
                 }
 
-                textBoxLog.Text += " : " + modifierKey + " : " +
-                                   keyboardMessageStr + " : " + virtualKeyCode +
-                                   Environment.NewLine +
-                                   this.currentlyPressedKeys;
+                // var logMessage = " : " + modifierKey + " : " +
+                //                    keyboardMessageStr + " : " + virtualKeyCode +
+                //                    Environment.NewLine +
+                //                    this.currentlyPressedKeys;
+                // logging.LogMessage(logMessage);
 
-                var altSKeyCombo = new KeyCombo(ModifierKeys.WindowsKey,
-                    new VirtualKeyCode(83u));
-                if(this.currentlyPressedKeys == altSKeyCombo)
+                var winSKeyCombo = new KeyCombo(ModifierKeys.WindowsKey | ModifierKeys.Shift,
+                    new VirtualKeyCode(0x58u));
+                if (this.currentlyPressedKeys == winSKeyCombo)
+                {
+                    AutomationExamples.MoveToGmail(logging);
                     forwardToNextHook = false;
+                }
             }
             
-            // todo: add some custom logic here
-            // SystemSounds.Beep.Play();
-
             if (forwardToNextHook)
                 return NativeApi.CallNextHookEx(hookHandle, nCode, wParam,
                     lParam);
@@ -112,7 +112,7 @@ namespace TestHotkeys
         }
 
         private IntPtr hookHandle;
-        private readonly TextBox textBoxLog;
+        private readonly IAppLogging logging;
         private KeyCombo currentlyPressedKeys = KeyCombo.None;
     }
 
@@ -222,4 +222,9 @@ public record KeyCombo
 
     private readonly ModifierKeys modifiers;
     private readonly VirtualKeyCode keyCode;
+}
+
+public interface IAppLogging
+{
+    void LogMessage(string message);
 }

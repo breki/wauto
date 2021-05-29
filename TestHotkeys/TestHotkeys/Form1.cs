@@ -4,7 +4,7 @@ using NonInvasiveKeyboardHookLibrary;
 
 namespace TestHotkeys
 {
-    public partial class Form1 : Form
+    public partial class Form1 : Form, IAppLogging
     {
         // private KeyboardHookManager keyboardHookManager;
         private MyKeyboardHandler keyboardHandler;
@@ -42,7 +42,7 @@ namespace TestHotkeys
             //     DoSomething();
             // });
 
-            keyboardHandler = new MyKeyboardHandler(this.textBoxLog);
+            keyboardHandler = new MyKeyboardHandler(this);
             keyboardHandler.Start();
         }
 
@@ -62,6 +62,11 @@ namespace TestHotkeys
         private void DoSomethingElse()
         {
             MessageBox.Show("Notepad, eh?", "Notepad, eh?");
+        }
+
+        public void LogMessage(string message)
+        {
+            textBoxLog.Text += System.Environment.NewLine + message;
         }
     }
 }
