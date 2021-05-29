@@ -66,7 +66,11 @@ namespace TestHotkeys
 
         public void LogMessage(string message)
         {
-            textBoxLog.Text += System.Environment.NewLine + message;
+            textBoxLog.Invoke((MethodInvoker) delegate
+            {
+                textBoxLog.Text += Environment.NewLine + message;
+            });
+            // textBoxLog.Text += Environment.NewLine + message;
         }
     }
 }

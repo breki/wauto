@@ -6,6 +6,8 @@ public static class AutomationExamples
 {
     public static void MoveToGmail(IAppLogging logging)
     {
+        logging.LogMessage("MoveToGmail");
+    
         foreach (AutomationElement el in AllMainWindows)
         {
             var name =
@@ -13,6 +15,8 @@ public static class AutomationExamples
                     .NameProperty);
             if (name.EndsWith("Google Chrome"))
             {
+                logging.LogMessage($"Found element {name}");
+                
                 el.SetFocus();
                 Thread.Sleep(1000);
                 SendKeys.SendWait("i");

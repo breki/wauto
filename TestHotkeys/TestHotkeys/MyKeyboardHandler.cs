@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using NonInvasiveKeyboardHookLibrary;
 
 namespace TestHotkeys
@@ -89,11 +90,12 @@ namespace TestHotkeys
                 //                    this.currentlyPressedKeys;
                 // logging.LogMessage(logMessage);
 
-                var winSKeyCombo = new KeyCombo(ModifierKeys.WindowsKey | ModifierKeys.Shift,
+                var winSKeyCombo = new KeyCombo(
+                    ModifierKeys.WindowsKey | ModifierKeys.Shift,
                     new VirtualKeyCode(0x58u));
                 if (this.currentlyPressedKeys == winSKeyCombo)
                 {
-                    AutomationExamples.MoveToGmail(logging);
+                    Task.Run(() => AutomationExamples.MoveToGmail(logging));
                     forwardToNextHook = false;
                 }
             }
