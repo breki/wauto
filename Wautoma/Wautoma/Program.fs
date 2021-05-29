@@ -30,6 +30,17 @@ let logActivityIntoTextBox msg (loggingTextBox: TextBox): unit =
     
     loggingTextBox.Invoke(MethodInvoker(logFunc)) |> ignore
 
+type loggingFunc = string -> unit
+
+let executeInBackground
+    (action: loggingFunc -> unit)
+    (logActivity: loggingFunc)
+    : unit =
+    let run() = action logActivity
+    let thread: Thread = Thread(ThreadStart(run))
+    thread.Start()
+    
+    
 [<EntryPoint; STAThread>]
 let main _ =
     Application.EnableVisualStyles()
@@ -39,14 +50,10 @@ let main _ =
     
     let logActivity msg = loggingTextBox |> logActivityIntoTextBox msg 
     
-    let backgroundTask() =
-        let run() =
-            Thread.Sleep(2000)
-            logActivity "Hello World!"
-        let thread: Thread = Thread(ThreadStart(run))
-        thread.Start()
-    
-    backgroundTask()
+    let logHelloWorld logger =
+        Thread.Sleep 2000
+        logger "Hello World!"
+    executeInBackground logHelloWorld logActivity
     
     Application.Run(form)
     0 // return an integer exit code
