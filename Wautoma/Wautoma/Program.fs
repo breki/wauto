@@ -3,12 +3,14 @@
 open System
 open System.Windows.Forms
 
-// Define a function to construct a message to print
-let from whom =
-    sprintf "from %s" whom
+type StartupForm() = 
+    inherit Form()
 
-[<EntryPoint>]
-let main argv =
-    let message = from "F#" // Call the function
-    printfn "Hello world %s" message
+[<EntryPoint; STAThread>]
+let main _ =
+    Application.EnableVisualStyles()
+    Application.SetCompatibleTextRenderingDefault(false)
+
+    use form = new StartupForm()
+    Application.Run(form)    
     0 // return an integer exit code
