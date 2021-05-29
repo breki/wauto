@@ -26,11 +26,19 @@ type AppForm() as this =
         this.Controls.Add(loggingTextBox)
 
         // todo igor: use an embedded icon here 
-        notifyIcon.Icon <- new Icon(@"D:\src\wauto\Wautoma\Wautoma\sample.ico");
+        notifyIcon.Icon <- new Icon(@"D:\src\wauto\Wautoma\Wautoma\sample.ico")
         notifyIcon.Visible <- true
 
     member this.LoggingTextBox = loggingTextBox
+    
+    override this.Dispose disposing =
+        if disposing then
+            if components <> null then
+                components.Dispose()
 
+        base.Dispose(disposing)
+        
+        
 let createUIElements() =
     let form = new AppForm()
     (form, form.LoggingTextBox)
@@ -38,7 +46,7 @@ let createUIElements() =
 let logActivityIntoTextBox msg (loggingTextBox: TextBox): unit =
     let logFunc() =
             loggingTextBox.Text <-
-                loggingTextBox.Text + Environment.NewLine + msg
+                loggingTextBox.Text + msg + Environment.NewLine
     
     loggingTextBox.Invoke(MethodInvoker(logFunc)) |> ignore
 
