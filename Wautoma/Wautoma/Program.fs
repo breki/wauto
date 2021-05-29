@@ -1,11 +1,13 @@
 ﻿// Learn more about F# at http://docs.microsoft.com/dotnet/fsharp
 
 open System
+open System.Drawing
 open System.Threading
 open System.Windows.Forms
 
-type AppForm() = 
+type AppForm() as this = 
     inherit Form()
+    member this.components = new System.ComponentModel.Container();
 
 let createUIElements() =
     let form = new AppForm()
@@ -21,6 +23,12 @@ let createUIElements() =
     loggingTextBox.Dock <- DockStyle.Fill
         
     form.Controls.Add(loggingTextBox)
+    
+    let notifyIcon = new NotifyIcon(form.components)
+    // todo igor: use an embedded icon here 
+    notifyIcon.Icon <- new Icon(@"D:\src\wauto\Wautoma\Wautoma\sample.ico");
+    notifyIcon.Visible <- true
+    
     (form, loggingTextBox)
     
 let logActivityIntoTextBox msg (loggingTextBox: TextBox): unit =

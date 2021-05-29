@@ -1,2 +1,5 @@
 - initial form
     - add icon to taskbar
+        - clean up resources properly
+        - on icon click, activate the window
+        - on window close, just hide it
