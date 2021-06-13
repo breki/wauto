@@ -1,6 +1,7 @@
 ﻿module Wautoma.KeyboardHandling
 
-open Wautoma.UIStuff
+open System
+open Wautoma.Logging
 open Wautoma.NativeApi
 
 type KeyboardHandler(loggingFunc: LoggingFunc) =
@@ -24,5 +25,17 @@ type KeyboardHandler(loggingFunc: LoggingFunc) =
 
     member this.Stop() : unit =
         match hookHandle with
-        | Some hookHandle -> UnhookWindowsHookEx(hookHandle) |> ignore
+        | Some hookHandleToUnhook ->
+            UnhookWindowsHookEx(hookHandleToUnhook) |> ignore
+            hookHandle <- None
         | None -> ()
+
+    interface IDisposable with
+        member this.Dispose() : unit =
+            this.Dispose(true)
+            GC.SuppressFinalize(this)
+
+    member this.Dispose disposing =
+        match disposing with
+        | true -> this.Stop()
+        | false -> ()
