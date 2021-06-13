@@ -53,11 +53,11 @@ let logActivityIntoTextBox msg (loggingTextBox: TextBox) : unit =
     loggingTextBox.Invoke(MethodInvoker(logFunc))
     |> ignore
 
-type loggingFunc = string -> unit
+type LoggingFunc = string -> unit
 
 let executeInBackground
-    (action: loggingFunc -> unit)
-    (logActivity: loggingFunc)
+    (action: LoggingFunc -> unit)
+    (logActivity: LoggingFunc)
     : unit =
     let run () = action logActivity
     let thread : Thread = Thread(ThreadStart(run))
