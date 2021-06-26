@@ -9,9 +9,19 @@ type KeyboardHandler(loggingFunc: LoggingFunc) =
 
     let loggingFunc = loggingFunc
 
-    let keyboardHookFunc nCode wParam lParam =
+    // todo now: extend the hook function
+    let keyboardHookFunc nCode (wParam: nativeint) lParam =
         match hookHandle with
-        | Some hookHandle -> CallNextHookEx(hookHandle, nCode, wParam, lParam)
+        | Some hookHandle ->
+            if nCode >= 0 then
+                let keyboardMessage : NativeKeyboardMessage =
+                    enum (int32 wParam)
+
+                ignore ()
+            else
+                ignore ()
+
+            CallNextHookEx(hookHandle, nCode, wParam, lParam)
         | None -> invalidOp "Hook handle not set."
 
     let keyboardHook = LowLevelKeyboardProc(keyboardHookFunc)

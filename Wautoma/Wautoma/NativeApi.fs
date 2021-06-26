@@ -2,20 +2,16 @@
 
 open System.Runtime.InteropServices
 
+
 [<Literal>]
 let WH_KEYBOARD_LL = 13
 
-[<Literal>]
-let WM_KEYDOWN = 256
 
-[<Literal>]
-let WM_KEYUP = 257
-
-[<Literal>]
-let WM_SYSKEYDOWN = 260
-
-[<Literal>]
-let WM_SYSKEYUP = 261
+type NativeKeyboardMessage =
+    | WM_KEYDOWN = 256
+    | WM_KEYUP = 257
+    | WM_SYSKEYDOWN = 260
+    | WM_SYSKEYUP = 261
 
 
 [<StructLayout(LayoutKind.Sequential)>]
