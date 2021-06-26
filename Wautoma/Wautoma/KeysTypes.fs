@@ -29,6 +29,11 @@ let virtualKeyCodeToModifierKeys (virtualKeyCode: VirtualKeyCode) =
 type KeyCombo =
     { Modifiers: ModifierKeys
       KeyCode: VirtualKeyCode option }
+
+    static member Empty =
+        { Modifiers = ModifierKeys.None
+          KeyCode = None }
+
     member this.WithPressedModifier modifier =
         let newModifiers = this.Modifiers ||| modifier
 
