@@ -17,6 +17,7 @@
         <Compile Include="UIStuff.fs" />
         <Compile Include="Program.fs" />
         <Content Include=".fantomasignore" />
+        <Content Include="sample.ico" />
     </ItemGroup>
 
 </Project>
