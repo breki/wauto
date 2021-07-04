@@ -16,53 +16,77 @@ type KeyboardHandler(loggingFunc: LoggingFunc) =
     let keyboardHookFunc nCode (wParam: nativeint) lParam =
         match hookHandle with
         | Some hookHandle ->
-            if nCode >= 0 then
-                let keyboardMessage : NativeKeyboardMessage =
-                    enum (int32 wParam)
+            let forwardToNextHook =
+                if nCode >= 0 then
+                    let keyboardMessage : NativeKeyboardMessage =
+                        enum (int32 wParam)
 
-                let kbHookStruct : KBDLLHOOKSTRUCT =
-                    Marshal.PtrToStructure(lParam, typeof<KBDLLHOOKSTRUCT>)
-                    :?> KBDLLHOOKSTRUCT
+                    let kbHookStruct : KBDLLHOOKSTRUCT =
+                        Marshal.PtrToStructure(lParam, typeof<KBDLLHOOKSTRUCT>)
+                        :?> KBDLLHOOKSTRUCT
 
-                let virtualKeyCode : VirtualKeyCode = kbHookStruct.vkCode
+                    let virtualKeyCode : VirtualKeyCode = kbHookStruct.vkCode
 
-                let modifierKey =
-                    virtualKeyCodeToModifierKeys virtualKeyCode
+                    let modifierKey =
+                        virtualKeyCodeToModifierKeys virtualKeyCode
 
-                let (|KEY_DOWN|KEY_UP|UNKNOWN|) keyboardMessage =
-                    match keyboardMessage with
-                    | NativeKeyboardMessage.WM_KEYDOWN -> KEY_DOWN
-                    | NativeKeyboardMessage.WM_SYSKEYDOWN -> KEY_DOWN
-                    | NativeKeyboardMessage.WM_KEYUP -> KEY_UP
-                    | NativeKeyboardMessage.WM_SYSKEYUP -> KEY_UP
-                    | _ -> UNKNOWN
+                    let (|KEY_DOWN|KEY_UP|UNKNOWN|) keyboardMessage =
+                        match keyboardMessage with
+                        | NativeKeyboardMessage.WM_KEYDOWN -> KEY_DOWN
+                        | NativeKeyboardMessage.WM_SYSKEYDOWN -> KEY_DOWN
+                        | NativeKeyboardMessage.WM_KEYUP -> KEY_UP
+                        | NativeKeyboardMessage.WM_SYSKEYUP -> KEY_UP
+                        | _ -> UNKNOWN
 
-                match keyboardMessage with
-                | KEY_DOWN ->
-                    if modifierKey = ModifierKeys.None then
-                        currentlyPressedKeys <-
-                            currentlyPressedKeys.WithPressedMainKey
-                                virtualKeyCode
+                    let newKeystroke =
+                        match keyboardMessage with
+                        | KEY_DOWN ->
+                            if modifierKey = ModifierKeys.None then
+                                currentlyPressedKeys <-
+                                    currentlyPressedKeys.WithPressedMainKey
+                                        virtualKeyCode
+                            else
+                                currentlyPressedKeys <-
+                                    currentlyPressedKeys.WithPressedModifier
+                                        modifierKey
+
+                            true
+                        | KEY_UP ->
+                            if modifierKey = ModifierKeys.None then
+                                currentlyPressedKeys <-
+                                    currentlyPressedKeys.WithUnpressedMainKey()
+                            else
+                                currentlyPressedKeys <-
+                                    currentlyPressedKeys.WithUnpressedModifier
+                                        modifierKey
+
+                            true
+                        | UNKNOWN -> false
+
+                    if newKeystroke then
+                        let winSKeyCombo =
+                            { Modifiers =
+                                  ModifierKeys.WindowsKey ||| ModifierKeys.Shift
+                              KeyCode = Some 0x58u }
+
+                        //                        match currentlyPressedKeys with
+//                        | combo when combo = winSKeyCombo ->
+//                            loggingFunc "Win+Shift+X"
+//                            false
+//                        | _ ->
+                        loggingFunc (currentlyPressedKeys.ToString())
+
+                        true
                     else
-                        currentlyPressedKeys <-
-                            currentlyPressedKeys.WithPressedModifier modifierKey
-                | KEY_UP ->
-                    if modifierKey = ModifierKeys.None then
-                        currentlyPressedKeys <-
-                            currentlyPressedKeys.WithUnpressedMainKey()
-                    else
-                        currentlyPressedKeys <-
-                            currentlyPressedKeys.WithUnpressedModifier
-                                modifierKey
-                | UNKNOWN ->
-                    // todo now: ignore these
-                    ignore ()
+                        false
+                else
+                    true
 
-                ignore ()
+            if forwardToNextHook then
+                CallNextHookEx(hookHandle, nCode, wParam, lParam)
             else
-                ignore ()
+                IntPtr(1)
 
-            CallNextHookEx(hookHandle, nCode, wParam, lParam)
         | None -> invalidOp "Hook handle not set."
 
     let keyboardHook = LowLevelKeyboardProc(keyboardHookFunc)

@@ -16,11 +16,13 @@ type NativeKeyboardMessage =
 
 [<StructLayout(LayoutKind.Sequential)>]
 type KBDLLHOOKSTRUCT =
-    val vkCode: uint32
-    val scanCode: uint32
-    val flags: uint32
-    val time: uint32
-    val dwExtraInfo: nativeint
+    struct
+        val vkCode: uint32
+        val scanCode: uint32
+        val flags: uint32
+        val time: uint32
+        val dwExtraInfo: nativeint
+    end
 
 type LowLevelKeyboardArgs = int * nativeint * nativeint
 type LowLevelKeyboardProc = delegate of int * nativeint * nativeint -> nativeint

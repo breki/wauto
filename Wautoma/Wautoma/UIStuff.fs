@@ -46,7 +46,7 @@ type AppForm() as this =
         this.Controls.Add(loggingTextBox)
 
         // todo igor: use an embedded icon here
-        notifyIcon.Icon <- new Icon(@"D:\src\wauto\Wautoma\Wautoma\sample.ico")
+        notifyIcon.Icon <- new Icon(@"\src\wauto\Wautoma\Wautoma\sample.ico")
         notifyIcon.Visible <- true
 
         keyboardHandler.Start()

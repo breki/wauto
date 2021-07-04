@@ -14,6 +14,7 @@ type ModifierKeys =
 
 type VirtualKeyCode = uint
 
+
 let virtualKeyCodeToModifierKeys (virtualKeyCode: VirtualKeyCode) =
     match virtualKeyCode with
     | 160u -> ModifierKeys.Shift
@@ -74,6 +75,7 @@ type KeyCombo =
             s.Append("Alt+") |> ignore
 
         let keyCodeToString keyCode =
+
             match keyCode with
             | 83u -> Some "S"
             | _ -> None
