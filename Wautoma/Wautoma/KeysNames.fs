@@ -1,7 +1,7 @@
 ﻿module Wautoma.KeysNames
 
 
-let keyNames =
+let keysNames =
     [ ""
       ""
       ""

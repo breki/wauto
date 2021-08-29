@@ -12,13 +12,13 @@
     <ItemGroup>
         <Compile Include="Logging.fs" />
         <Compile Include="NativeApi.fs" />
+        <Compile Include="KeysNames.fs" />
         <Compile Include="KeysTypes.fs" />
         <Compile Include="KeyboardHandling.fs" />
         <Compile Include="UIStuff.fs" />
         <Compile Include="Program.fs" />
         <Content Include=".fantomasignore" />
         <Content Include="sample.ico" />
-        <Compile Include="KeysNames.fs" />
     </ItemGroup>
 
 </Project>

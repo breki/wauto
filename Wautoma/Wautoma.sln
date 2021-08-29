@@ -7,6 +7,8 @@ ProjectSection(SolutionItems) = preProject
 	TODO.md = TODO.md
 EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Wautoma.Tests", "Wautoma.Tests\Wautoma.Tests.fsproj", "{F6739E02-7070-487D-9F56-28F20FBA456C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,5 +19,9 @@ Global
 		{928B1EB6-7788-4369-8B40-256C0AEE6E55}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{928B1EB6-7788-4369-8B40-256C0AEE6E55}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{928B1EB6-7788-4369-8B40-256C0AEE6E55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6739E02-7070-487D-9F56-28F20FBA456C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6739E02-7070-487D-9F56-28F20FBA456C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6739E02-7070-487D-9F56-28F20FBA456C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6739E02-7070-487D-9F56-28F20FBA456C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
