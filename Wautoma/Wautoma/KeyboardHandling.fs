@@ -64,19 +64,15 @@ type KeyboardHandler(loggingFunc: LoggingFunc) =
                         | UNKNOWN -> false
 
                     if newKeystroke then
-                        let winSKeyCombo =
-                            { Modifiers =
-                                  ModifierKeys.WindowsKey ||| ModifierKeys.Shift
-                              KeyCode = Some 0x58u }
+                        let winXKeyCombo = KeyCombo.Parse("Win+Shift+X")
 
-                        //                        match currentlyPressedKeys with
-//                        | combo when combo = winSKeyCombo ->
-//                            loggingFunc "Win+Shift+X"
-//                            false
-//                        | _ ->
-                        loggingFunc (currentlyPressedKeys.ToString())
-
-                        true
+                        match currentlyPressedKeys with
+                        | combo when combo = winXKeyCombo ->
+                            loggingFunc "Win+Shift+X"
+                            false
+                        | _ ->
+                            loggingFunc (currentlyPressedKeys.ToString())
+                            true
                     else
                         false
                 else

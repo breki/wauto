@@ -23,15 +23,12 @@ let keysNames =
        "" // Alt
        "Pause"
        "Caps Lock"
-       ""
-       ""
-       ""
-       ""
-       ""
-       ""
-       ""
-       ""
-       ""
+       "" // 0x15 VK_KANA / VK_HANGUEL / VK_HANGUL
+       "" // 0x16 VK_IME_ON
+       "" // 0x17 VK_JUNJA
+       "" // 0x18 VK_FINAL
+       "" // 0x19 VK_HANJA / VK_KANJI
+       "" // 0x1a VK_IME_OFF
        "Esc"
        ""
        ""
@@ -116,6 +113,7 @@ let keysNames =
        "NumSeparator"
        "NumMinus"
        "NumDecimal"
+       "NumDivide"
        "F1"
        "F2"
        "F3"
@@ -126,11 +124,13 @@ let keysNames =
        "F8"
        "F9"
        "F10"
+       "F11"
        "F12"
        "F13"
        "F14"
        "F15"
        "F16"
+       "F17"
        "F18"
        "F19"
        "F20"
@@ -148,6 +148,7 @@ let keysNames =
        ""
        "Num Lock"
        "Scroll Lock"
+       ""
        ""
        ""
        ""

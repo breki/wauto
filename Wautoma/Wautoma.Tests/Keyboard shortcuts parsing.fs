@@ -1,5 +1,6 @@
 ﻿module Tests.``Keyboard shortcuts parsing``
 
+open Wautoma.KeysNames
 open Wautoma.KeysTypes
 open Xunit
 open Swensen.Unquote
@@ -41,3 +42,20 @@ let ``KeyCombo parsing and text serialization works`` () =
 [<Fact>]
 let ``handles empty key combo`` () =
     test <@ KeyCombo.Empty = KeyCombo.Parse("") @>
+
+[<Theory>]
+[<InlineData(0x08, "Backspace")>]
+[<InlineData(0x13, "Pause")>]
+[<InlineData(0x14, "Caps Lock")>]
+[<InlineData(0x1b, "Esc")>]
+[<InlineData(0x24, "Home")>]
+[<InlineData(0x30, "0")>]
+[<InlineData(0x41, "A")>]
+[<InlineData(0x6e, "NumDecimal")>]
+[<InlineData(0x7e, "F15")>]
+[<InlineData(0x87, "F24")>]
+[<InlineData(0x90, "Num Lock")>]
+[<InlineData(0xa0, "Left Shift")>]
+[<InlineData(0xa5, "Right Menu")>]
+let ``key codes and names are correct`` code name =
+    test <@ keysNames.[code] = name @>
