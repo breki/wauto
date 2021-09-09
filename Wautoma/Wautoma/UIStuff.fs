@@ -59,7 +59,6 @@ type AppForm() as this =
         (keyboardHandler :> IDisposable).Dispose()
 
         if disposing then
-
             if components <> null then
                 components.Dispose()
 
@@ -76,5 +75,5 @@ let executeInBackground
     (logActivity: LoggingFunc)
     : unit =
     let run () = action logActivity
-    let thread : Thread = Thread(ThreadStart(run))
+    let thread: Thread = Thread(ThreadStart(run))
     thread.Start()

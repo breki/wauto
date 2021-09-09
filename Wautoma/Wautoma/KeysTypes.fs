@@ -1,5 +1,6 @@
 ﻿module Wautoma.KeysTypes
 
+open KeysNames
 open System
 open System.Text
 
@@ -13,6 +14,17 @@ type ModifierKeys =
 
 
 type VirtualKeyCode = uint
+
+
+
+let keysNamesToKeyCodes =
+    keysNames
+    |> Array.mapi
+        (fun code name ->
+            let vkcode: VirtualKeyCode = uint code
+            (name, vkcode))
+    |> Array.filter (fun (name, _) -> name.Length > 0)
+    |> dict
 
 
 let virtualKeyCodeToModifierKeys (virtualKeyCode: VirtualKeyCode) =
@@ -34,6 +46,46 @@ type KeyCombo =
     static member Empty =
         { Modifiers = ModifierKeys.None
           KeyCode = None }
+
+    static member Parse(value: string) : KeyCombo =
+        let processSplit
+            ((modifiers, keycode): ModifierKeys * VirtualKeyCode option)
+            (split: string)
+            : ModifierKeys * VirtualKeyCode option =
+            // todo now: trim the split
+
+            match split with
+            | "Win" -> (modifiers ||| ModifierKeys.WindowsKey), keycode
+            | "Shift" -> (modifiers ||| ModifierKeys.Shift), keycode
+            | "Ctrl" -> (modifiers ||| ModifierKeys.Control), keycode
+            | "Alt" -> (modifiers ||| ModifierKeys.Alt), keycode
+            | _ ->
+                match keycode with
+                | Some _ ->
+                    // the keycode was already parsed, so there cannot be
+                    // another one
+                    let message = sprintf $"Invalid hotkey '%s{value}'."
+                    invalidArg "value" message
+                | None ->
+                    if keysNamesToKeyCodes.ContainsKey split then
+                        let keycode = keysNamesToKeyCodes.[split]
+                        (modifiers, Some keycode)
+                    else
+                        let message = sprintf $"Invalid hotkey '%s{value}'."
+                        invalidArg "value" message
+
+        match value with
+        | "" -> KeyCombo.Empty
+        | _ ->
+            let splits = value.Split('+')
+
+            let modifiers, keycode =
+                splits
+                |> Array.rev
+                |> Array.fold processSplit (ModifierKeys.None, None)
+
+            { Modifiers = modifiers
+              KeyCode = keycode }
 
     member this.WithPressedModifier modifier =
         let newModifiers = this.Modifiers ||| modifier
@@ -74,16 +126,14 @@ type KeyCombo =
            <> ModifierKeys.None then
             s.Append("Alt+") |> ignore
 
-        let keyCodeToString keyCode =
-
-            match keyCode with
-            | 83u -> Some "S"
-            | _ -> None
+        let keyCodeToString (keyCode: VirtualKeyCode) : string =
+            keysNames.[keyCode |> uint |> int]
 
         let keyCodeStr =
-            this.KeyCode |> Option.bind keyCodeToString
+            this.KeyCode |> Option.map keyCodeToString
 
-        if keyCodeStr |> Option.isSome then
-            s.Append(keyCodeStr) |> ignore
+        match keyCodeStr with
+        | Some keyCodeStr -> s.Append(keyCodeStr) |> ignore
+        | None -> ()
 
         s.ToString()
