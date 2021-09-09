@@ -5,6 +5,7 @@ open System.Runtime.InteropServices
 open Wautoma.KeysTypes
 open Wautoma.Logging
 open Wautoma.NativeApi
+open Wautoma.UIAutomation.AutomationExamples
 
 type KeyboardHandler(loggingFunc: LoggingFunc) =
     let mutable hookHandle: nativeint option = None
@@ -69,6 +70,7 @@ type KeyboardHandler(loggingFunc: LoggingFunc) =
                         match currentlyPressedKeys with
                         | combo when combo = winXKeyCombo ->
                             loggingFunc "pressed Win+Shift+X"
+                            moveToGmail loggingFunc
                             false
                         | empty when empty = KeyCombo.Empty -> true
                         | _ ->
