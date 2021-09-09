@@ -52,7 +52,6 @@ type KeyCombo =
             ((modifiers, keycode): ModifierKeys * VirtualKeyCode option)
             (split: string)
             : ModifierKeys * VirtualKeyCode option =
-            // todo now: trim the split
 
             match split with
             | "Win" -> (modifiers ||| ModifierKeys.WindowsKey), keycode
@@ -74,7 +73,9 @@ type KeyCombo =
                         let message = sprintf $"Invalid hotkey '%s{value}'."
                         invalidArg "value" message
 
-        match value with
+        let trimmedValue = value.Trim()
+
+        match trimmedValue with
         | "" -> KeyCombo.Empty
         | _ ->
             let splits = value.Split('+')

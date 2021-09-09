@@ -7,25 +7,25 @@ open Wautoma.Logging
 open Wautoma.NativeApi
 
 type KeyboardHandler(loggingFunc: LoggingFunc) =
-    let mutable hookHandle : nativeint option = None
-    let mutable currentlyPressedKeys : KeyCombo = KeyCombo.Empty
+    let mutable hookHandle: nativeint option = None
+    let mutable currentlyPressedKeys: KeyCombo = KeyCombo.Empty
 
     let loggingFunc = loggingFunc
 
-    // todo now: extend the hook function
+    // todo igor: extend the hook function
     let keyboardHookFunc nCode (wParam: nativeint) lParam =
         match hookHandle with
         | Some hookHandle ->
             let forwardToNextHook =
                 if nCode >= 0 then
-                    let keyboardMessage : NativeKeyboardMessage =
+                    let keyboardMessage: NativeKeyboardMessage =
                         enum (int32 wParam)
 
-                    let kbHookStruct : KBDLLHOOKSTRUCT =
+                    let kbHookStruct: KBDLLHOOKSTRUCT =
                         Marshal.PtrToStructure(lParam, typeof<KBDLLHOOKSTRUCT>)
                         :?> KBDLLHOOKSTRUCT
 
-                    let virtualKeyCode : VirtualKeyCode = kbHookStruct.vkCode
+                    let virtualKeyCode: VirtualKeyCode = kbHookStruct.vkCode
 
                     let modifierKey =
                         virtualKeyCodeToModifierKeys virtualKeyCode

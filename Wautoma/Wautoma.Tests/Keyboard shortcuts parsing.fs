@@ -1,6 +1,5 @@
 ﻿module Tests.``Keyboard shortcuts parsing``
 
-open Microsoft.FSharp.Primitives.Basics
 open Wautoma.KeysTypes
 open Xunit
 open Swensen.Unquote

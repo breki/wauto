@@ -11,7 +11,7 @@ let main _ =
 
     let form, loggingTextBox = createUIElements ()
 
-    // todo now: this should be returned by createUIElements
+    // todo igor: this should be returned by createUIElements
     let logActivity msg =
         loggingTextBox |> logActivityIntoTextBox msg
 
