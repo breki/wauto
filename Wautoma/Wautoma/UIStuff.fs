@@ -10,7 +10,7 @@ open Wautoma.Logging
 
 let logActivityIntoTextBox msg (loggingTextBox: TextBox) : unit =
     let logFunc () =
-        loggingTextBox.Text <- loggingTextBox.Text + msg + Environment.NewLine
+        loggingTextBox.AppendText(msg + Environment.NewLine)
 
     loggingTextBox.Invoke(MethodInvoker(logFunc))
     |> ignore
@@ -42,6 +42,7 @@ type AppForm() as this =
         loggingTextBox.Multiline <- true
         loggingTextBox.ReadOnly <- true
         loggingTextBox.Dock <- DockStyle.Fill
+        loggingTextBox.ScrollBars <- ScrollBars.Vertical
 
         this.Controls.Add(loggingTextBox)
 

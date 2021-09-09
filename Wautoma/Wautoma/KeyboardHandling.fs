@@ -68,8 +68,9 @@ type KeyboardHandler(loggingFunc: LoggingFunc) =
 
                         match currentlyPressedKeys with
                         | combo when combo = winXKeyCombo ->
-                            loggingFunc "Win+Shift+X"
+                            loggingFunc "pressed Win+Shift+X"
                             false
+                        | empty when empty = KeyCombo.Empty -> true
                         | _ ->
                             loggingFunc (currentlyPressedKeys.ToString())
                             true

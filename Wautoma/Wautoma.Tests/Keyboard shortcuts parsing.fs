@@ -57,5 +57,6 @@ let ``handles empty key combo`` () =
 [<InlineData(0x90, "Num Lock")>]
 [<InlineData(0xa0, "Left Shift")>]
 [<InlineData(0xa5, "Right Menu")>]
+[<InlineData(0xff, "")>]
 let ``key codes and names are correct`` code name =
     test <@ keysNames.[code] = name @>
