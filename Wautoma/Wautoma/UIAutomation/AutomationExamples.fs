@@ -71,7 +71,7 @@ let moveToGmail (loggingFunc: LoggingFunc) : unit =
         chrome.SetFocus()
         pause 250
         "+^A" |> sendKeys loggingFunc
-        pause 100
+        pause 250
         "gmail" |> sendKeys loggingFunc
         pause 250
         "{ENTER}" |> sendKeys loggingFunc

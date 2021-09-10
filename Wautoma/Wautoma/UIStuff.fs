@@ -4,6 +4,7 @@ open System
 open System.Drawing
 open System.Windows.Forms
 open Wautoma.KeyboardHandling
+open Wautoma.Settings
 
 
 let logActivityIntoTextBox msg (loggingTextBox: TextBox) : unit =
@@ -27,9 +28,21 @@ type AppForm() as this =
     let notifyIcon = new NotifyIcon(components)
     let keyboardHandler = new KeyboardHandler(logActivity)
 
+    let settingsFileName = "Wautoma-settings.json"
+
     do
-        this.Width <- 500
-        this.Height <- 500
+        let settings = loadSettings settingsFileName
+
+        this.StartPosition <- FormStartPosition.Manual
+
+        this.Location <-
+            Point(
+                settings |> getSettingInt "form.x" 10,
+                settings |> getSettingInt "form.y" 10
+            )
+
+        this.Width <- settings |> getSettingInt "form.width" 500
+        this.Height <- settings |> getSettingInt "form.height" 500
 
         loggingTextBox.Anchor <-
             AnchorStyles.Top
@@ -52,7 +65,15 @@ type AppForm() as this =
 
     member this.LoggingTextBox = loggingTextBox
 
-    override this.OnClosing(_) = keyboardHandler.Stop()
+    override this.OnClosing _ =
+        keyboardHandler.Stop()
+
+        loadSettings settingsFileName
+        |> setSetting "form.x" this.Location.X
+        |> setSetting "form.y" this.Location.Y
+        |> setSetting "form.width" this.Width
+        |> setSetting "form.height" this.Height
+        |> saveSettings settingsFileName
 
     override this.Dispose disposing =
         (keyboardHandler :> IDisposable).Dispose()
