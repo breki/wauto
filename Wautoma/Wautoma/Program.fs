@@ -2,7 +2,7 @@
 open System.Threading
 open System.Windows.Forms
 open Wautoma.UIStuff
-
+open Wautoma.Async
 
 [<EntryPoint; STAThread>]
 let main _ =
@@ -19,7 +19,7 @@ let main _ =
         Thread.Sleep 2000
         logger "Hello World!"
 
-    executeInBackground logHelloWorld logActivity
+    logHelloWorld |> executeInBackground logActivity
 
     Application.Run(form)
     0

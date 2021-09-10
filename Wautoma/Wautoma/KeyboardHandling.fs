@@ -6,14 +6,16 @@ open Wautoma.KeysTypes
 open Wautoma.Logging
 open Wautoma.NativeApi
 open Wautoma.UIAutomation.AutomationExamples
+open Wautoma.Async
 
 type KeyboardHandler(loggingFunc: LoggingFunc) =
     let mutable hookHandle: nativeint option = None
     let mutable currentlyPressedKeys: KeyCombo = KeyCombo.Empty
 
+    //    let mutable inHotkeyActioMode = false
+
     let loggingFunc = loggingFunc
 
-    // todo igor: extend the hook function
     let keyboardHookFunc nCode (wParam: nativeint) lParam =
         match hookHandle with
         | Some hookHandle ->
@@ -62,7 +64,9 @@ type KeyboardHandler(loggingFunc: LoggingFunc) =
                                         modifierKey
 
                             true
-                        | UNKNOWN -> false
+                        | UNKNOWN ->
+                            "UNKOWN" |> loggingFunc
+                            false
 
                     if newKeystroke then
                         let winXKeyCombo = KeyCombo.Parse("Win+Shift+X")
@@ -70,13 +74,14 @@ type KeyboardHandler(loggingFunc: LoggingFunc) =
                         match currentlyPressedKeys with
                         | combo when combo = winXKeyCombo ->
                             loggingFunc "pressed Win+Shift+X"
-                            moveToGmail loggingFunc
+                            moveToGmail |> executeInBackground loggingFunc
                             false
                         | empty when empty = KeyCombo.Empty -> true
                         | _ ->
                             loggingFunc (currentlyPressedKeys.ToString())
                             true
                     else
+                        "!newKeystroke" |> loggingFunc
                         false
                 else
                     true

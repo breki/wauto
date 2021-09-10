@@ -2,10 +2,8 @@
 
 open System
 open System.Drawing
-open System.Threading
 open System.Windows.Forms
 open Wautoma.KeyboardHandling
-open Wautoma.Logging
 
 
 let logActivityIntoTextBox msg (loggingTextBox: TextBox) : unit =
@@ -70,11 +68,3 @@ type AppForm() as this =
 let createUIElements () =
     let form = new AppForm()
     (form, form.LoggingTextBox)
-
-let executeInBackground
-    (action: LoggingFunc -> unit)
-    (logActivity: LoggingFunc)
-    : unit =
-    let run () = action logActivity
-    let thread: Thread = Thread(ThreadStart(run))
-    thread.Start()

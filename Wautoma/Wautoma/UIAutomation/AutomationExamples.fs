@@ -30,8 +30,34 @@ let sendKeys loggingFunc keysStr =
     | :? InvalidOperationException as ex ->
         $"InvalidOperationException %A{ex}" |> loggingFunc
 
+let getWindowPattern (el: AutomationElement) : WindowPattern option =
+    try
+        let windowPattern =
+            el.GetCurrentPattern(WindowPattern.Pattern) :?> WindowPattern
 
-let pause () = Thread.Sleep(250)
+        if windowPattern.WaitForInputIdle(10000) then
+            Some windowPattern
+        else
+            None
+    with
+    | :? InvalidOperationException as ex -> None
+
+let unminimizeWindow (windowPattern: WindowPattern) : unit =
+    let interactionState =
+        windowPattern.Current.WindowInteractionState
+
+    if interactionState = WindowInteractionState.ReadyForUserInteraction then
+        windowPattern.SetWindowVisualState(WindowVisualState.Normal)
+    else
+        ()
+
+let unminimize (el: AutomationElement) : unit =
+    el
+    |> getWindowPattern
+    |> Option.map unminimizeWindow
+    |> ignore
+
+let pause (time: int) = Thread.Sleep(time)
 
 let moveToGmail (loggingFunc: LoggingFunc) : unit =
     let chromeMaybe =
@@ -41,11 +67,12 @@ let moveToGmail (loggingFunc: LoggingFunc) : unit =
     match chromeMaybe with
     | Some chrome ->
         loggingFunc "Found Chrome"
+        chrome |> unminimize
         chrome.SetFocus()
-        pause ()
-        "+(^A)" |> sendKeys loggingFunc
-        pause ()
+        pause 250
+        "+^A" |> sendKeys loggingFunc
+        pause 100
         "gmail" |> sendKeys loggingFunc
-        pause ()
+        pause 250
         "{ENTER}" |> sendKeys loggingFunc
     | None -> ()
