@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <Compile Include="Keyboard shortcuts parsing.fs" />
+        <Compile Include="UI automation.fs" />
     </ItemGroup>
 
     <ItemGroup>

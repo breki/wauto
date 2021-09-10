@@ -25,11 +25,13 @@ let nameEndsWith text (el: AutomationElement) =
 let sendKeys loggingFunc keysStr =
     try
         $"Sending keys %s{keysStr}" |> loggingFunc
-        SendKeys.Send(keysStr)
+        SendKeys.SendWait(keysStr)
     with
     | :? InvalidOperationException as ex ->
         $"InvalidOperationException %A{ex}" |> loggingFunc
 
+
+let pause () = Thread.Sleep(250)
 
 let moveToGmail (loggingFunc: LoggingFunc) : unit =
     let chromeMaybe =
@@ -40,10 +42,10 @@ let moveToGmail (loggingFunc: LoggingFunc) : unit =
     | Some chrome ->
         loggingFunc "Found Chrome"
         chrome.SetFocus()
-        Thread.Sleep(250)
+        pause ()
         "+(^A)" |> sendKeys loggingFunc
-        Thread.Sleep(1000)
+        pause ()
         "gmail" |> sendKeys loggingFunc
-        Thread.Sleep(1000)
+        pause ()
         "{ENTER}" |> sendKeys loggingFunc
     | None -> ()
