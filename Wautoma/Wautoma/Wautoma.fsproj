@@ -14,6 +14,7 @@
     <ItemGroup>
         <Compile Include="Logging.fs" />
         <Compile Include="Async.fs" />
+        <Compile Include="Settings.fs" />
         <Compile Include="NativeApi.fs" />
         <Compile Include="KeysNames.fs" />
         <Compile Include="KeysTypes.fs" />
@@ -27,6 +28,7 @@
 
     <ItemGroup>
         <PackageReference Update="FSharp.Core" Version="5.0.2" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     </ItemGroup>
 
 </Project>
