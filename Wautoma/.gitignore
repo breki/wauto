@@ -1,0 +1,4 @@
+.fake
+build.fsx.lock
+
+build/

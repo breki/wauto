@@ -146,6 +146,6 @@ type HotkeyAction = Logged
 type Hotkey =
     { Keys: KeyCombo
       Action: HotkeyAction
-      Description: str }
+      Description: string }
 
 type Hotkeys = Map<KeyCombo, Hotkey>
