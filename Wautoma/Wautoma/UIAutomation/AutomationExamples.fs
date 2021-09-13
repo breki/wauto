@@ -17,6 +17,13 @@ let allMainWindows () =
             yield el
     }
 
+let nameStartsWith text (el: AutomationElement) =
+    let name =
+        el.GetCurrentPropertyValue(AutomationElement.NameProperty)
+        |> string
+
+    name.StartsWith(text)
+
 let nameEndsWith text (el: AutomationElement) =
     let name =
         el.GetCurrentPropertyValue(AutomationElement.NameProperty)
@@ -73,7 +80,12 @@ let focus (el: AutomationElement) : AutomationElement =
     el
 
 let runProgram filename : unit =
-    let procStartInfo = ProcessStartInfo(FileName = filename)
+    let procStartInfo =
+        ProcessStartInfo(
+            FileName = filename,
+            UseShellExecute = false
+        )
+
     let proc = new Process(StartInfo = procStartInfo)
     proc.Start() |> ignore
 
@@ -136,3 +148,12 @@ let openFoobar2000 (_: LoggingFunc) : unit =
                @"foobar2000\foobar2000.exe" |]
         )
         |> runProgram
+
+let openWindowsTerminal (_: LoggingFunc) : unit =
+    let appFormMaybe =
+        allMainWindows ()
+        |> Seq.tryFind (nameStartsWith "WinTerm")
+
+    match appFormMaybe with
+    | Some appForm -> appForm |> unminimize |> focus |> ignore
+    | None -> "wt.exe" |> runProgram
