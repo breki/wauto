@@ -5,7 +5,6 @@ open System.Runtime.InteropServices
 open Wautoma.KeysTypes
 open Wautoma.Logging
 open Wautoma.NativeApi
-open Wautoma.UIAutomation.AutomationExamples
 open Wautoma.Async
 
 type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =

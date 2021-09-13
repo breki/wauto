@@ -16,7 +16,7 @@ let logActivityIntoTextBox msg (loggingTextBox: TextBox) : unit =
     |> ignore
 
 
-type AppForm() as this =
+type AppForm(hotkeys: Hotkeys) as this =
     inherit Form()
 
     let components = new System.ComponentModel.Container()
@@ -27,13 +27,6 @@ type AppForm() as this =
         loggingTextBox |> logActivityIntoTextBox msg
 
     let notifyIcon = new NotifyIcon(components)
-
-    let hotkeys: Hotkeys =
-        [ { Keys = KeyCombo.Parse("Win+Shift+X")
-            Action = moveToGmail
-            Description = "Open Gmail" } ]
-        |> List.map (fun x -> x.Keys, x)
-        |> Map.ofSeq
 
     let keyboardHandler =
         new KeyboardHandler(hotkeys, logActivity)
@@ -96,6 +89,6 @@ type AppForm() as this =
 
 
 
-let createUIElements () =
-    let form = new AppForm()
+let createUIElements hotkeys =
+    let form = new AppForm(hotkeys)
     (form, form.LoggingTextBox)
