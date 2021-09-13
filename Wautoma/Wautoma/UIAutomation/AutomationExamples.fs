@@ -79,7 +79,7 @@ let runProgram filename : unit =
 
 let pause (time: int) = Thread.Sleep(time)
 
-let moveToGmail (loggingFunc: LoggingFunc) : unit =
+let openGmail (loggingFunc: LoggingFunc) : unit =
     let chromeMaybe =
         allMainWindows ()
         |> Seq.tryFind (nameEndsWith "Google Chrome")
@@ -105,11 +105,11 @@ let openNotepadPlusPlus (_: LoggingFunc) : unit =
     | None -> runProgram "notepad++.exe"
 
 let openFm (_: LoggingFunc) : unit =
-    let appMaybe =
+    let appFormMaybe =
         allMainWindows () |> Seq.tryFind (nameIs "fman")
 
-    match appMaybe with
-    | Some notepad -> notepad |> unminimize |> focus |> ignore
+    match appFormMaybe with
+    | Some appForm -> appForm |> unminimize |> focus |> ignore
     | None ->
         let appDataDir =
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
@@ -117,5 +117,22 @@ let openFm (_: LoggingFunc) : unit =
         Path.Combine(
             [| appDataDir
                @"Microsoft\Windows\Start Menu\Programs\fman.lnk" |]
+        )
+        |> runProgram
+
+let openFoobar2000 (_: LoggingFunc) : unit =
+    let appFormMaybe =
+        allMainWindows ()
+        |> Seq.tryFind (nameEndsWith "[foobar2000]")
+
+    match appFormMaybe with
+    | Some appForm -> appForm |> unminimize |> focus |> ignore
+    | None ->
+        let programFilesDir =
+            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)
+
+        Path.Combine(
+            [| programFilesDir
+               @"foobar2000\foobar2000.exe" |]
         )
         |> runProgram

@@ -4,4 +4,4 @@ open Wautoma.UIAutomation.AutomationExamples
 open Xunit
 
 //[<Fact>]
-let ``moving to GMail`` () = moveToGmail (fun x -> printf $"%s{x}")
+let ``moving to GMail`` () = openGmail (fun x -> printf $"%s{x}")
