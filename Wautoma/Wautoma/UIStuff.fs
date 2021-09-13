@@ -6,9 +6,8 @@ open System.Windows.Forms
 open Wautoma.KeyboardHandling
 open Wautoma.KeysTypes
 open Wautoma.Settings
-open Wautoma.UIAutomation.AutomationExamples
 
-let logActivityIntoTextBox msg (loggingTextBox: TextBox) : unit =
+let logActivityIntoTextBox (loggingTextBox: TextBox) msg : unit =
     let logFunc () =
         loggingTextBox.AppendText(msg + Environment.NewLine)
 
@@ -24,7 +23,7 @@ type AppForm(hotkeys: Hotkeys) as this =
     let loggingTextBox = new TextBox()
 
     let logActivity msg =
-        loggingTextBox |> logActivityIntoTextBox msg
+        logActivityIntoTextBox loggingTextBox msg
 
     let notifyIcon = new NotifyIcon(components)
 
@@ -91,4 +90,8 @@ type AppForm(hotkeys: Hotkeys) as this =
 
 let createUIElements hotkeys =
     let form = new AppForm(hotkeys)
-    (form, form.LoggingTextBox)
+
+    let loggingFunc =
+        form.LoggingTextBox |> logActivityIntoTextBox
+
+    form, loggingFunc

@@ -20,11 +20,7 @@ let main _ =
     Application.EnableVisualStyles()
     Application.SetCompatibleTextRenderingDefault(false)
 
-    let form, loggingTextBox = createUIElements hotkeys
-
-    // todo igor: this should be returned by createUIElements
-    let logActivity msg =
-        loggingTextBox |> logActivityIntoTextBox msg
+    let form, logActivity = createUIElements hotkeys
 
     let logHelloWorld logger =
         Thread.Sleep 2000
