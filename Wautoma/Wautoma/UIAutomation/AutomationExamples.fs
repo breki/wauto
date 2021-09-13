@@ -1,6 +1,8 @@
 ﻿module Wautoma.UIAutomation.AutomationExamples
 
 open System
+open System.Diagnostics
+open System.IO
 open System.Threading
 open System.Windows.Automation
 open System.Windows.Forms
@@ -21,6 +23,13 @@ let nameEndsWith text (el: AutomationElement) =
         |> string
 
     name.EndsWith(text)
+
+let nameIs text (el: AutomationElement) =
+    let name =
+        el.GetCurrentPropertyValue(AutomationElement.NameProperty)
+        |> string
+
+    name = text
 
 let sendKeys loggingFunc keysStr =
     try
@@ -51,11 +60,22 @@ let unminimizeWindow (windowPattern: WindowPattern) : unit =
     else
         ()
 
-let unminimize (el: AutomationElement) : unit =
+let unminimize (el: AutomationElement) : AutomationElement =
     el
     |> getWindowPattern
     |> Option.map unminimizeWindow
     |> ignore
+
+    el
+
+let focus (el: AutomationElement) : AutomationElement =
+    el.SetFocus()
+    el
+
+let runProgram filename : unit =
+    let procStartInfo = ProcessStartInfo(FileName = filename)
+    let proc = new Process(StartInfo = procStartInfo)
+    proc.Start() |> ignore
 
 let pause (time: int) = Thread.Sleep(time)
 
@@ -66,9 +86,7 @@ let moveToGmail (loggingFunc: LoggingFunc) : unit =
 
     match chromeMaybe with
     | Some chrome ->
-        loggingFunc "Found Chrome"
-        chrome |> unminimize
-        chrome.SetFocus()
+        chrome |> unminimize |> focus |> ignore
         pause 250
         "+^A" |> sendKeys loggingFunc
         pause 250
@@ -76,3 +94,28 @@ let moveToGmail (loggingFunc: LoggingFunc) : unit =
         pause 250
         "{ENTER}" |> sendKeys loggingFunc
     | None -> ()
+
+let openNotepadPlusPlus (_: LoggingFunc) : unit =
+    let notepadMaybe =
+        allMainWindows ()
+        |> Seq.tryFind (nameEndsWith "Notepad++")
+
+    match notepadMaybe with
+    | Some notepad -> notepad |> unminimize |> focus |> ignore
+    | None -> runProgram "notepad++.exe"
+
+let openFm (_: LoggingFunc) : unit =
+    let appMaybe =
+        allMainWindows () |> Seq.tryFind (nameIs "fman")
+
+    match appMaybe with
+    | Some notepad -> notepad |> unminimize |> focus |> ignore
+    | None ->
+        let appDataDir =
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+
+        Path.Combine(
+            [| appDataDir
+               @"Microsoft\Windows\Start Menu\Programs\fman.lnk" |]
+        )
+        |> runProgram

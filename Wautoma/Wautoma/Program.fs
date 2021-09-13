@@ -10,7 +10,13 @@ open Wautoma.UIAutomation.AutomationExamples
 let hotkeys: Hotkeys =
     [ { Keys = KeyCombo.Parse("Win+Shift+X")
         Action = moveToGmail
-        Description = "Open Gmail" } ]
+        Description = "Open Gmail" }
+      { Keys = KeyCombo.Parse("Win+N")
+        Action = openNotepadPlusPlus
+        Description = "Open Notepad++" }
+      { Keys = KeyCombo.Parse("Win+E")
+        Action = openFm
+        Description = "Open fm" } ]
     |> List.map (fun x -> x.Keys, x)
     |> Map.ofSeq
 
