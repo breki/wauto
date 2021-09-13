@@ -40,7 +40,7 @@ let getWindowPattern (el: AutomationElement) : WindowPattern option =
         else
             None
     with
-    | :? InvalidOperationException as ex -> None
+    | :? InvalidOperationException -> None
 
 let unminimizeWindow (windowPattern: WindowPattern) : unit =
     let interactionState =

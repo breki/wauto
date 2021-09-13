@@ -4,8 +4,9 @@ open System
 open System.Drawing
 open System.Windows.Forms
 open Wautoma.KeyboardHandling
+open Wautoma.KeysTypes
 open Wautoma.Settings
-
+open Wautoma.UIAutomation.AutomationExamples
 
 let logActivityIntoTextBox msg (loggingTextBox: TextBox) : unit =
     let logFunc () =
@@ -26,7 +27,16 @@ type AppForm() as this =
         loggingTextBox |> logActivityIntoTextBox msg
 
     let notifyIcon = new NotifyIcon(components)
-    let keyboardHandler = new KeyboardHandler(logActivity)
+
+    let hotkeys: Hotkeys =
+        [ { Keys = KeyCombo.Parse("Win+Shift+X")
+            Action = moveToGmail
+            Description = "Open Gmail" } ]
+        |> List.map (fun x -> x.Keys, x)
+        |> Map.ofSeq
+
+    let keyboardHandler =
+        new KeyboardHandler(hotkeys, logActivity)
 
     let settingsFileName = "Wautoma-settings.json"
 

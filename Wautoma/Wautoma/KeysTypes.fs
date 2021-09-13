@@ -3,6 +3,7 @@
 open KeysNames
 open System
 open System.Text
+open Wautoma.Logging
 
 [<Flags>]
 type ModifierKeys =
@@ -138,3 +139,13 @@ type KeyCombo =
         | None -> ()
 
         s.ToString()
+
+
+type HotkeyAction = Logged
+
+type Hotkey =
+    { Keys: KeyCombo
+      Action: HotkeyAction
+      Description: str }
+
+type Hotkeys = Map<KeyCombo, Hotkey>
