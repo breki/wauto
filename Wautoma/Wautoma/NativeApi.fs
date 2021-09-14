@@ -28,14 +28,14 @@ type LowLevelKeyboardArgs = int * nativeint * nativeint
 type LowLevelKeyboardProc = delegate of int * nativeint * nativeint -> nativeint
 
 type MouseEventFlags =
-    | LeftDown = 0x00000002
-    | LeftUp = 0x00000004
-    | MiddleDown = 0x00000020
-    | MiddleUp = 0x00000040
-    | Move = 0x00000001
-    | Absolute = 0x00008000
-    | RightDown = 0x00000008
-    | RightUp = 0x00000010
+    | LeftDown = 0x2
+    | LeftUp = 0x4
+    | MiddleDown = 0x20
+    | MiddleUp = 0x40
+    | Move = 0x1
+    | Absolute = 0x8000
+    | RightDown = 0x8
+    | RightUp = 0x10
 
 type MousePoint =
     struct
