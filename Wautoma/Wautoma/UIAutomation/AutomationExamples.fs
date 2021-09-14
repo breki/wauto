@@ -86,6 +86,10 @@ let rightClick _ =
 
     mouse_event (int MouseEventFlags.RightUp, cursorPos.x, cursorPos.y, 0, 0)
 
+let hibernate _ =
+    Application.SetSuspendState(PowerState.Hibernate, true, true)
+    |> ignore
+
 let runProgram filename : unit =
     let procStartInfo =
         ProcessStartInfo(FileName = filename, UseShellExecute = false)
