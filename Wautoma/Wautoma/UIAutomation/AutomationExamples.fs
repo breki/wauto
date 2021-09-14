@@ -7,6 +7,7 @@ open System.Threading
 open System.Windows.Automation
 open System.Windows.Forms
 open Wautoma.Logging
+open Wautoma.NativeApi
 
 let allChildren =
     TreeScope.Children, Condition.TrueCondition
@@ -79,12 +80,15 @@ let focus (el: AutomationElement) : AutomationElement =
     el.SetFocus()
     el
 
+let rightClick _ =
+    let mutable cursorPos = MousePoint()
+    GetCursorPos(&cursorPos) |> ignore
+
+    mouse_event (int MouseEventFlags.RightDown, cursorPos.x, cursorPos.y, 0, 0)
+
 let runProgram filename : unit =
     let procStartInfo =
-        ProcessStartInfo(
-            FileName = filename,
-            UseShellExecute = false
-        )
+        ProcessStartInfo(FileName = filename, UseShellExecute = false)
 
     let proc = new Process(StartInfo = procStartInfo)
     proc.Start() |> ignore
@@ -101,7 +105,7 @@ let openGmail (loggingFunc: LoggingFunc) : unit =
         chrome |> unminimize |> focus |> ignore
         pause 250
         "+^A" |> sendKeys loggingFunc
-        pause 250
+        pause 500
         "gmail" |> sendKeys loggingFunc
         pause 250
         "{ENTER}" |> sendKeys loggingFunc
@@ -114,7 +118,7 @@ let openNotepadPlusPlus (_: LoggingFunc) : unit =
 
     match notepadMaybe with
     | Some notepad -> notepad |> unminimize |> focus |> ignore
-    | None -> runProgram "notepad++.exe"
+    | None -> runProgram "notepad++.exeX"
 
 let openFm (_: LoggingFunc) : unit =
     let appFormMaybe =

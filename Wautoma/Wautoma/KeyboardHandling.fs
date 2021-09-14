@@ -69,11 +69,10 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
                     if newKeystroke then
                         match hotkeys.TryFind currentlyPressedKeys with
                         | Some hotkey ->
-                            try
-                                executeInBackground loggingFunc hotkey.Action
-                            with
-                            | ex -> loggingFunc (ex.ToString())
+                            $"Executing action '%s{hotkey.Description}'"
+                            |> loggingFunc
 
+                            executeInBackground loggingFunc hotkey.Action
                             false
                         | None -> true
                     else
