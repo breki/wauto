@@ -23,7 +23,8 @@
         <Compile Include="UIStuff.fs" />
         <Compile Include="Program.fs" />
         <Content Include=".fantomasignore" />
-        <Content Include="sample.ico" />
+        <Content Include="icon.ico" />
+        <Content Include="icon.pdn" />
     </ItemGroup>
 
     <ItemGroup>

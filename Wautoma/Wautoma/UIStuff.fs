@@ -46,6 +46,11 @@ type AppForm(hotkeys: Hotkeys) as this =
         this.Width <- settings |> getSettingInt "form.width" 500
         this.Height <- settings |> getSettingInt "form.height" 500
 
+        let icon =
+            new Icon(@"\src\wauto\Wautoma\Wautoma\icon.ico")
+
+        this.Icon <- icon
+
         loggingTextBox.Anchor <-
             AnchorStyles.Top
             ||| AnchorStyles.Right
@@ -60,7 +65,7 @@ type AppForm(hotkeys: Hotkeys) as this =
         this.Controls.Add(loggingTextBox)
 
         // todo igor: use an embedded icon here
-        notifyIcon.Icon <- new Icon(@"\src\wauto\Wautoma\Wautoma\sample.ico")
+        notifyIcon.Icon <- icon
         notifyIcon.Visible <- true
 
         keyboardHandler.Start()
