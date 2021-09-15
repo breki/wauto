@@ -78,6 +78,7 @@ type AppForm(hotkeys: Hotkeys) as this =
     do
         let settings = loadSettings settingsFileName
 
+        this.Text <- "Wautoma"
         this.StartPosition <- FormStartPosition.Manual
 
         this.Location <-
