@@ -56,6 +56,10 @@ type AppForm(hotkeys: Hotkeys) as this =
             menuItem.Text <- "Resume Hotkeys"
 
     let saveAppState () =
+        // the window should be in normal state before we measure it
+        this.Show()
+        this.WindowState <- FormWindowState.Normal
+
         loadSettings settingsFileName
         |> setSetting "form.x" this.Location.X
         |> setSetting "form.y" this.Location.Y
@@ -92,14 +96,25 @@ type AppForm(hotkeys: Hotkeys) as this =
         this.Text <- "Wautoma"
         this.StartPosition <- FormStartPosition.Manual
 
-        this.Location <-
-            Point(
-                settings |> getSettingInt "form.x" 10,
-                settings |> getSettingInt "form.y" 10
-            )
+        let x =
+            settings |> getSettingInt "form.x" 10 |> max 0
 
-        this.Width <- settings |> getSettingInt "form.width" 500
-        this.Height <- settings |> getSettingInt "form.height" 500
+        let y =
+            settings |> getSettingInt "form.y" 10 |> max 0
+
+        let width =
+            settings
+            |> getSettingInt "form.width" 500
+            |> max 300
+
+        let height =
+            settings
+            |> getSettingInt "form.height" 500
+            |> max 200
+
+        this.Location <- Point(x, y)
+        this.Width <- width
+        this.Height <- height
         this.ShowInTaskbar <- false
 
         let icon =
@@ -158,8 +173,6 @@ type AppForm(hotkeys: Hotkeys) as this =
                 components.Dispose()
 
         base.Dispose(disposing)
-
-
 
 
 let createUIElements hotkeys =
