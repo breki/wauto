@@ -43,6 +43,10 @@ type AppForm(hotkeys: Hotkeys) as this =
         this.WindowState <- FormWindowState.Minimized
         this.Hide()
 
+    let showLogWindowOnLeftClick obj (args: MouseEventArgs) =
+        if args.Button &&& MouseButtons.Left = MouseButtons.Left then
+            showLogWindow obj args
+
     let suspendResumeHotkeys (menuItem: MenuItem) _ _ =
         if keyboardHandler.IsSuspended then
             keyboardHandler.Resume()
@@ -113,8 +117,8 @@ type AppForm(hotkeys: Hotkeys) as this =
         notifyIcon.Icon <- icon
         notifyIcon.Visible <- true
 
-        EventHandler showLogWindow
-        |> notifyIcon.Click.AddHandler
+        MouseEventHandler showLogWindowOnLeftClick
+        |> notifyIcon.MouseClick.AddHandler
 
         onMenuItemClick
             suspendResumeMenuItem
