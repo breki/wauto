@@ -90,6 +90,8 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
 
     let keyboardHook = LowLevelKeyboardProc(keyboardHookFunc)
 
+    member this.IsSuspended = suspended
+
     member this.Start() =
         let hMod = LoadLibrary("User32")
 

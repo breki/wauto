@@ -7,6 +7,8 @@ open Wautoma.KeyboardHandling
 open Wautoma.KeysTypes
 open Wautoma.Settings
 
+type EventHandlerFunc = obj -> EventArgs -> unit
+
 let logActivityIntoTextBox (loggingTextBox: TextBox) msg : unit =
     let logFunc () =
         loggingTextBox.AppendText(msg + Environment.NewLine)
@@ -41,9 +43,13 @@ type AppForm(hotkeys: Hotkeys) as this =
         this.WindowState <- FormWindowState.Minimized
         this.Hide()
 
-    let suspendHotkeys _ _ = keyboardHandler.Suspend()
-
-    let resumeHotkeys _ _ = keyboardHandler.Resume()
+    let suspendResumeHotkeys (menuItem: MenuItem) _ _ =
+        if keyboardHandler.IsSuspended then
+            keyboardHandler.Resume()
+            menuItem.Text <- "Suspend Hotkeys"
+        else
+            keyboardHandler.Suspend()
+            menuItem.Text <- "Resume Hotkeys"
 
     let saveAppState () =
         loadSettings settingsFileName
@@ -53,13 +59,20 @@ type AppForm(hotkeys: Hotkeys) as this =
         |> setSetting "form.height" this.Height
         |> saveSettings settingsFileName
 
-    let createMenuItem text eventHandlerFunc =
-        let menuItem = new MenuItem(text)
-
+    let onMenuItemClick (menuItem: MenuItem) eventHandlerFunc =
         EventHandler eventHandlerFunc
         |> menuItem.Click.AddHandler
 
+    let createMenuItem text (eventHandlerFunc: EventHandlerFunc option) =
+        let menuItem = new MenuItem(text)
+
+        match eventHandlerFunc with
+        | Some eventHandlerFunc -> onMenuItemClick menuItem eventHandlerFunc
+        | None -> ()
+
         menuItem
+
+    let suspendResumeMenuItem = createMenuItem "Suspend Hotkeys" None
 
 
     do
@@ -102,11 +115,14 @@ type AppForm(hotkeys: Hotkeys) as this =
         EventHandler showLogWindow
         |> notifyIcon.Click.AddHandler
 
+        onMenuItemClick
+            suspendResumeMenuItem
+            (suspendResumeHotkeys suspendResumeMenuItem)
+
         notifyIcon.ContextMenu <-
             new ContextMenu(
-                [| createMenuItem "Show Log Window" showLogWindow
-                   createMenuItem "Suspend Hotkeys" suspendHotkeys
-                   createMenuItem "Resume Hotkeys" resumeHotkeys |]
+                [| createMenuItem "Show Log Window" (Some showLogWindow)
+                   suspendResumeMenuItem |]
             )
 
         keyboardHandler.Start()
