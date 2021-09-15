@@ -122,7 +122,7 @@ let openNotepadPlusPlus (_: LoggingFunc) : unit =
 
     match notepadMaybe with
     | Some notepad -> notepad |> unminimize |> focus |> ignore
-    | None -> runProgram "notepad++.exeX"
+    | None -> runProgram "notepad++.exe"
 
 let openFm (_: LoggingFunc) : unit =
     let appFormMaybe =

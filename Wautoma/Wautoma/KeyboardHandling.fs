@@ -10,6 +10,7 @@ open Wautoma.Async
 type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
     let mutable hookHandle: nativeint option = None
     let mutable currentlyPressedKeys: KeyCombo = KeyCombo.Empty
+    let mutable suspended = false
 
     let hotkeys = hotkeys
     let loggingFunc = loggingFunc
@@ -67,14 +68,14 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
                             false
 
                     if newKeystroke then
-                        match hotkeys.TryFind currentlyPressedKeys with
-                        | Some hotkey ->
+                        match hotkeys.TryFind currentlyPressedKeys, suspended with
+                        | Some hotkey, false ->
                             $"Executing action '%s{hotkey.Description}'"
                             |> loggingFunc
 
                             executeInBackground loggingFunc hotkey.Action
                             false
-                        | None -> true
+                        | _ -> true
                     else
                         false
                 else
@@ -95,6 +96,10 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
         hookHandle <-
             SetWindowsHookEx(WH_KEYBOARD_LL, keyboardHook, hMod, 0u)
             |> Some
+
+    member this.Suspend() = suspended <- true
+
+    member this.Resume() = suspended <- false
 
     member this.Stop() : unit =
         match hookHandle with

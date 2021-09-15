@@ -32,6 +32,36 @@ type AppForm(hotkeys: Hotkeys) as this =
 
     let settingsFileName = "Wautoma-settings.json"
 
+    let showLogWindow _ _ =
+        this.Show()
+        this.WindowState <- FormWindowState.Normal
+        this.ShowInTaskbar <- true
+
+    let hideLogWindow () =
+        this.WindowState <- FormWindowState.Minimized
+        this.Hide()
+
+    let suspendHotkeys _ _ = keyboardHandler.Suspend()
+
+    let resumeHotkeys _ _ = keyboardHandler.Resume()
+
+    let saveAppState () =
+        loadSettings settingsFileName
+        |> setSetting "form.x" this.Location.X
+        |> setSetting "form.y" this.Location.Y
+        |> setSetting "form.width" this.Width
+        |> setSetting "form.height" this.Height
+        |> saveSettings settingsFileName
+
+    let createMenuItem text eventHandlerFunc =
+        let menuItem = new MenuItem(text)
+
+        EventHandler eventHandlerFunc
+        |> menuItem.Click.AddHandler
+
+        menuItem
+
+
     do
         let settings = loadSettings settingsFileName
 
@@ -45,6 +75,7 @@ type AppForm(hotkeys: Hotkeys) as this =
 
         this.Width <- settings |> getSettingInt "form.width" 500
         this.Height <- settings |> getSettingInt "form.height" 500
+        this.ShowInTaskbar <- false
 
         let icon =
             new Icon(@"\src\wauto\Wautoma\Wautoma\icon.ico")
@@ -68,19 +99,27 @@ type AppForm(hotkeys: Hotkeys) as this =
         notifyIcon.Icon <- icon
         notifyIcon.Visible <- true
 
+        EventHandler showLogWindow
+        |> notifyIcon.Click.AddHandler
+
+        notifyIcon.ContextMenu <-
+            new ContextMenu(
+                [| createMenuItem "Show Log Window" showLogWindow
+                   createMenuItem "Suspend Hotkeys" suspendHotkeys
+                   createMenuItem "Resume Hotkeys" resumeHotkeys |]
+            )
+
         keyboardHandler.Start()
 
     member this.LoggingTextBox = loggingTextBox
 
-    override this.OnClosing _ =
-        keyboardHandler.Stop()
+    override this.OnLoad _ = hideLogWindow ()
 
-        loadSettings settingsFileName
-        |> setSetting "form.x" this.Location.X
-        |> setSetting "form.y" this.Location.Y
-        |> setSetting "form.width" this.Width
-        |> setSetting "form.height" this.Height
-        |> saveSettings settingsFileName
+    override this.OnClosing e =
+        e.Cancel <- true
+        hideLogWindow ()
+
+    //        keyboardHandler.Stop()
 
     override this.Dispose disposing =
         (keyboardHandler :> IDisposable).Dispose()
@@ -90,6 +129,7 @@ type AppForm(hotkeys: Hotkeys) as this =
                 components.Dispose()
 
         base.Dispose(disposing)
+
 
 
 
