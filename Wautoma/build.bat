@@ -9,7 +9,6 @@ dotnet publish Wautoma\Wautoma.fsproj --configuration Release || GOTO :error
 ECHO.
 ECHO.
 ECHO BUILD SUCCESSFUL
-CALL :Speak "BUILD SUCCESSFUL"
 GOTO :EOF
 
 :error

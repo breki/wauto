@@ -117,8 +117,7 @@ type AppForm(hotkeys: Hotkeys) as this =
         this.Height <- height
         this.ShowInTaskbar <- false
 
-        let icon =
-            new Icon(@"\src\wauto\Wautoma\Wautoma\icon.ico")
+        let icon = new Icon("icon.ico")
 
         this.Icon <- icon
 
@@ -135,7 +134,6 @@ type AppForm(hotkeys: Hotkeys) as this =
 
         this.Controls.Add(loggingTextBox)
 
-        // todo igor: use an embedded icon here
         notifyIcon.Icon <- icon
         notifyIcon.Visible <- true
 
