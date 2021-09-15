@@ -63,11 +63,16 @@ type AppForm(hotkeys: Hotkeys) as this =
         |> setSetting "form.height" this.Height
         |> saveSettings settingsFileName
 
+    let exit _ _ =
+        keyboardHandler.Stop()
+        saveAppState ()
+        Application.Exit()
+
     let onMenuItemClick (menuItem: MenuItem) eventHandlerFunc =
         EventHandler eventHandlerFunc
         |> menuItem.Click.AddHandler
 
-    let createMenuItem text (eventHandlerFunc: EventHandlerFunc option) =
+    let menuItem text (eventHandlerFunc: EventHandlerFunc option) =
         let menuItem = new MenuItem(text)
 
         match eventHandlerFunc with
@@ -76,7 +81,9 @@ type AppForm(hotkeys: Hotkeys) as this =
 
         menuItem
 
-    let suspendResumeMenuItem = createMenuItem "Suspend Hotkeys" None
+    let menuItemsSeparator () = menuItem "-" None
+
+    let suspendResumeMenuItem = menuItem "Suspend Hotkeys" None
 
 
     do
@@ -126,8 +133,11 @@ type AppForm(hotkeys: Hotkeys) as this =
 
         notifyIcon.ContextMenu <-
             new ContextMenu(
-                [| createMenuItem "Show Log Window" (Some showLogWindow)
-                   suspendResumeMenuItem |]
+                [| menuItem "Show Log Window" (Some showLogWindow)
+                   menuItemsSeparator ()
+                   suspendResumeMenuItem
+                   menuItemsSeparator ()
+                   menuItem "Exit" (Some exit) |]
             )
 
         keyboardHandler.Start()
@@ -139,8 +149,6 @@ type AppForm(hotkeys: Hotkeys) as this =
     override this.OnClosing e =
         e.Cancel <- true
         hideLogWindow ()
-
-    //        keyboardHandler.Stop()
 
     override this.Dispose disposing =
         (keyboardHandler :> IDisposable).Dispose()
