@@ -55,6 +55,15 @@ type AppForm(hotkeys: Hotkeys) as this =
             keyboardHandler.Suspend()
             menuItem.Text <- "Resume Hotkeys"
 
+    let toggleDebugLogging (menuItem: MenuItem) _ _ =
+        if keyboardHandler.DebugLoggingEnabled then
+            keyboardHandler.DisableDebugLogging()
+            menuItem.Text <- "Enable Debug Logging"
+        else
+            keyboardHandler.EnableDebugLogging()
+            menuItem.Text <- "Disable Debug Logging"
+
+
     let saveAppState () =
         // the window should be in normal state before we measure it
         this.Show()
@@ -88,7 +97,7 @@ type AppForm(hotkeys: Hotkeys) as this =
     let menuItemsSeparator () = menuItem "-" None
 
     let suspendResumeMenuItem = menuItem "Suspend Hotkeys" None
-
+    let debugLoggingMenuItem = menuItem "Enable Debug Logging" None
 
     do
         let settings = loadSettings settingsFileName
@@ -144,11 +153,16 @@ type AppForm(hotkeys: Hotkeys) as this =
             suspendResumeMenuItem
             (suspendResumeHotkeys suspendResumeMenuItem)
 
+        onMenuItemClick
+            debugLoggingMenuItem
+            (toggleDebugLogging debugLoggingMenuItem)
+
         notifyIcon.ContextMenu <-
             new ContextMenu(
                 [| menuItem "Show Log Window" (Some showLogWindow)
                    menuItemsSeparator ()
                    suspendResumeMenuItem
+                   debugLoggingMenuItem
                    menuItemsSeparator ()
                    menuItem "Exit" (Some exit) |]
             )

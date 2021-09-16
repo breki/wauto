@@ -11,11 +11,16 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
     let mutable hookHandle: nativeint option = None
     let mutable currentlyPressedKeys: KeyCombo = KeyCombo.Empty
     let mutable suspended = false
+    let mutable debugLoggingEnabled = false
 
     let hotkeys = hotkeys
     let loggingFunc = loggingFunc
 
     let keyboardHookFunc nCode (wParam: nativeint) lParam =
+        if debugLoggingEnabled then
+            $"nCode=%A{nCode}, wParam=%A{wParam}, lParam=%A{lParam}"
+            |> loggingFunc
+
         match hookHandle with
         | Some hookHandle ->
             let forwardToNextHook =
@@ -32,6 +37,10 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
                     let modifierKey =
                         virtualKeyCodeToModifierKeys virtualKeyCode
 
+                    if debugLoggingEnabled then
+                        $"virtualKeyCode=%A{virtualKeyCode}, modifierKey=%A{modifierKey}"
+                        |> loggingFunc
+
                     let (|KEY_DOWN|KEY_UP|UNKNOWN|) keyboardMessage =
                         match keyboardMessage with
                         | NativeKeyboardMessage.WM_KEYDOWN -> KEY_DOWN
@@ -39,6 +48,10 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
                         | NativeKeyboardMessage.WM_KEYUP -> KEY_UP
                         | NativeKeyboardMessage.WM_SYSKEYUP -> KEY_UP
                         | _ -> UNKNOWN
+
+                    if debugLoggingEnabled then
+                        $"currentlyPressedKeys before=%A{currentlyPressedKeys}"
+                        |> loggingFunc
 
                     let newKeystroke =
                         match keyboardMessage with
@@ -67,6 +80,10 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
                             "UNKOWN" |> loggingFunc
                             false
 
+                    if debugLoggingEnabled then
+                        $"currentlyPressedKeys after=%A{currentlyPressedKeys}"
+                        |> loggingFunc
+
                     if newKeystroke then
                         match hotkeys.TryFind currentlyPressedKeys, suspended with
                         | Some hotkey, false ->
@@ -91,6 +108,7 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
     let keyboardHook = LowLevelKeyboardProc(keyboardHookFunc)
 
     member this.IsSuspended = suspended
+    member this.DebugLoggingEnabled = debugLoggingEnabled
 
     member this.Start() =
         let hMod = LoadLibrary("User32")
@@ -100,8 +118,10 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
             |> Some
 
     member this.Suspend() = suspended <- true
-
     member this.Resume() = suspended <- false
+
+    member this.DisableDebugLogging() = debugLoggingEnabled <- false
+    member this.EnableDebugLogging() = debugLoggingEnabled <- true
 
     member this.Stop() : unit =
         match hookHandle with

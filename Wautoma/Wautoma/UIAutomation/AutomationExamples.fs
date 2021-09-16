@@ -59,19 +59,28 @@ let getWindowPattern (el: AutomationElement) : WindowPattern option =
     with
     | :? InvalidOperationException -> None
 
-let unminimizeWindow (windowPattern: WindowPattern) : unit =
+let activateWindow (windowPattern: WindowPattern) : unit =
     let interactionState =
         windowPattern.Current.WindowInteractionState
 
     if interactionState = WindowInteractionState.ReadyForUserInteraction then
-        windowPattern.SetWindowVisualState(WindowVisualState.Normal)
+        let state = windowPattern.Current.WindowVisualState
+
+        if state = WindowVisualState.Minimized then
+            windowPattern.SetWindowVisualState(WindowVisualState.Normal)
+        else
+            ()
     else
         ()
+        
+//let activateWindow2 (el: AutomationElement) : AutomationElement =
+//    let handle = el.GetCurrentPropertyValue(AutomationElement.NativeWindowHandleProperty)
+    
 
-let unminimize (el: AutomationElement) : AutomationElement =
+let activate (el: AutomationElement) : AutomationElement =
     el
     |> getWindowPattern
-    |> Option.map unminimizeWindow
+    |> Option.map activateWindow
     |> ignore
 
     el
@@ -106,7 +115,7 @@ let openGmail (loggingFunc: LoggingFunc) : unit =
 
     match chromeMaybe with
     | Some chrome ->
-        chrome |> unminimize |> focus |> ignore
+        chrome |> activate |> focus |> ignore
         pause 250
         "+^A" |> sendKeys loggingFunc
         pause 500
@@ -121,7 +130,7 @@ let openNotepadPlusPlus (_: LoggingFunc) : unit =
         |> Seq.tryFind (nameEndsWith "Notepad++")
 
     match notepadMaybe with
-    | Some notepad -> notepad |> unminimize |> focus |> ignore
+    | Some notepad -> notepad |> activate |> focus |> ignore
     | None -> runProgram "notepad++.exe"
 
 let openFm (_: LoggingFunc) : unit =
@@ -129,7 +138,7 @@ let openFm (_: LoggingFunc) : unit =
         allMainWindows () |> Seq.tryFind (nameIs "fman")
 
     match appFormMaybe with
-    | Some appForm -> appForm |> unminimize |> focus |> ignore
+    | Some appForm -> appForm |> activate |> focus |> ignore
     | None ->
         let appDataDir =
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
@@ -146,7 +155,7 @@ let openFoobar2000 (_: LoggingFunc) : unit =
         |> Seq.tryFind (nameEndsWith "[foobar2000]")
 
     match appFormMaybe with
-    | Some appForm -> appForm |> unminimize |> focus |> ignore
+    | Some appForm -> appForm |> activate |> focus |> ignore
     | None ->
         let programFilesDir =
             Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)
@@ -163,5 +172,5 @@ let openWindowsTerminal (_: LoggingFunc) : unit =
         |> Seq.tryFind (nameStartsWith "WinTerm")
 
     match appFormMaybe with
-    | Some appForm -> appForm |> unminimize |> focus |> ignore
+    | Some appForm -> appForm |> activate |> focus |> ignore
     | None -> "wt.exe" |> runProgram
