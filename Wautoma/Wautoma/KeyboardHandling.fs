@@ -2,6 +2,7 @@
 
 open System
 open System.Runtime.InteropServices
+open Microsoft.Win32
 open Wautoma.KeysTypes
 open Wautoma.Logging
 open Wautoma.NativeApi
@@ -15,6 +16,18 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
 
     let hotkeys = hotkeys
     let loggingFunc = loggingFunc
+
+    let onPowerModeChanged _ (args: PowerModeChangedEventArgs) =
+        if debugLoggingEnabled then
+            $"onPowerModeChanged - mode %A{args.Mode}"
+            |> loggingFunc
+
+        // we do this so the app does not remember the currently pressed
+        // modifier keys when switching to hibernate or sleep
+        currentlyPressedKeys <- KeyCombo.Empty
+
+    let onPowerModeChangedHandler =
+        PowerModeChangedEventHandler onPowerModeChanged
 
     let keyboardHookFunc nCode (wParam: nativeint) lParam =
         if debugLoggingEnabled then
@@ -111,6 +124,9 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
     member this.DebugLoggingEnabled = debugLoggingEnabled
 
     member this.Start() =
+        onPowerModeChangedHandler
+        |> SystemEvents.PowerModeChanged.AddHandler
+
         let hMod = LoadLibrary("User32")
 
         hookHandle <-
@@ -124,6 +140,9 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
     member this.EnableDebugLogging() = debugLoggingEnabled <- true
 
     member this.Stop() : unit =
+        onPowerModeChangedHandler
+        |> SystemEvents.PowerModeChanged.RemoveHandler
+
         match hookHandle with
         | Some hookHandleToUnhook ->
             UnhookWindowsHookEx(hookHandleToUnhook) |> ignore

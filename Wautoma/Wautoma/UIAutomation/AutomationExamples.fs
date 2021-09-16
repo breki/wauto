@@ -3,6 +3,7 @@
 open System
 open System.Diagnostics
 open System.IO
+open System.Runtime.InteropServices
 open System.Threading
 open System.Windows.Automation
 open System.Windows.Forms
@@ -17,6 +18,28 @@ let allMainWindows () =
         for el in AutomationElement.RootElement.FindAll allChildren do
             yield el
     }
+
+
+let allWindowsHandlesForProcess processId =
+    let rec run current acc =
+        let found =
+            FindWindowEx(IntPtr.Zero, current, null, null)
+
+        if found = IntPtr.Zero then
+            acc
+        else
+            let mutable windowProcessId: Int32 = 0
+
+            GetWindowThreadProcessId(found, &windowProcessId)
+            |> ignore
+
+            if windowProcessId = processId then
+                (found :: acc)
+            else
+                acc
+            |> run found
+
+    run IntPtr.Zero []
 
 let nameStartsWith text (el: AutomationElement) =
     let name =
@@ -59,31 +82,66 @@ let getWindowPattern (el: AutomationElement) : WindowPattern option =
     with
     | :? InvalidOperationException -> None
 
-let activateWindow (windowPattern: WindowPattern) : unit =
+
+let getWindowPlacement handle =
+    let mutable placement =
+        WINDOWPLACEMENT(length = Marshal.SizeOf(typeof<WINDOWPLACEMENT>))
+
+    if GetWindowPlacement(handle, &placement) then
+        Some placement
+    else
+        None
+
+let getAutoElementWindowPlacement
+    (el: AutomationElement)
+    : WINDOWPLACEMENT option =
+    let winHandleInt =
+        el.GetCurrentPropertyValue(AutomationElement.NativeWindowHandleProperty)
+        :?> int
+
+    let winHandle = winHandleInt |> IntPtr.op_Explicit
+
+    getWindowPlacement winHandle
+
+let getWindowPlacementShowCommandAndFlags
+    (windowPlacement: WINDOWPLACEMENT)
+    : ShowWindowCommand * WindowPlacementFlags =
+    LanguagePrimitives.EnumOfValue windowPlacement.showCmd,
+    LanguagePrimitives.EnumOfValue windowPlacement.flags
+
+let setWindowState (windowPattern: WindowPattern) state : unit =
     let interactionState =
         windowPattern.Current.WindowInteractionState
 
     if interactionState = WindowInteractionState.ReadyForUserInteraction then
-        let state = windowPattern.Current.WindowVisualState
-
-        if state = WindowVisualState.Minimized then
-            windowPattern.SetWindowVisualState(WindowVisualState.Normal)
-        else
-            ()
+        windowPattern.SetWindowVisualState(state)
     else
         ()
-        
-//let activateWindow2 (el: AutomationElement) : AutomationElement =
-//    let handle = el.GetCurrentPropertyValue(AutomationElement.NativeWindowHandleProperty)
-    
+
+let maximizeWindow (windowPattern: WindowPattern) =
+    setWindowState windowPattern WindowVisualState.Maximized
+
+let setWindowToNormal (windowPattern: WindowPattern) =
+    setWindowState windowPattern WindowVisualState.Normal
 
 let activate (el: AutomationElement) : AutomationElement =
-    el
-    |> getWindowPattern
-    |> Option.map activateWindow
-    |> ignore
+    getAutoElementWindowPlacement el
+    |> Option.map getWindowPlacementShowCommandAndFlags
+    |> function
+        | Some (cmd, flags) when cmd = ShowWindowCommand.Minimized ->
+            let windowFunc =
+                if flags &&& WindowPlacementFlags.RestoreToMaximized = WindowPlacementFlags.RestoreToMaximized then
+                    maximizeWindow
+                else
+                    setWindowToNormal
 
-    el
+            el
+            |> getWindowPattern
+            |> Option.map windowFunc
+            |> ignore
+
+            el
+        | _ -> el
 
 let focus (el: AutomationElement) : AutomationElement =
     el.SetFocus()

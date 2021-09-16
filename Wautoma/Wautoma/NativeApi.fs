@@ -1,5 +1,6 @@
 ﻿module Wautoma.NativeApi
 
+open System
 open System.Runtime.InteropServices
 
 
@@ -66,3 +67,41 @@ extern bool GetCursorPos(MousePoint& lpPoint)
 
 [<DllImport("user32.dll")>]
 extern void mouse_event(int dwFlags, int dx, int dy, int dwData, int dwExtraInfo)
+
+type ShowWindowCommand =
+    | Hide = 0
+    | Normal = 1
+    | Minimized = 2
+    | Maximized = 3
+
+[<Flags>]
+type WindowPlacementFlags =
+    | AsyncWindowPlacement = 0x0004
+    | RestoreToMaximized = 0x0002
+    | SetMinPosition = 0x0001
+
+[<Struct; StructLayout(LayoutKind.Sequential)>]
+type WINDOWPLACEMENT =
+    val mutable length: int
+    val mutable flags: int
+    val mutable showCmd: int
+    val mutable minPositionX: int
+    val mutable minPositionY: int
+    val mutable maxPositionX: int
+    val mutable maxPositionY: int
+    val mutable normalPositionLeft: int
+    val mutable normalPositionTop: int
+    val mutable normalPositionRight: int
+    val mutable normalPositionBottom: int
+
+[<DllImport("user32")>]
+extern bool SetWindowPlacement(nativeint handle, [<In>] WINDOWPLACEMENT& placement)
+
+[<DllImport("user32")>]
+extern bool GetWindowPlacement(nativeint handle, WINDOWPLACEMENT& placement)
+
+[<DllImport("user32.dll")>]
+extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr child, string className, string windowTitle)
+
+[<DllImport("User32")>]
+extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, Int32& lpdwProcessId)
