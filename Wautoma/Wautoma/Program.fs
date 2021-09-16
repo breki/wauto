@@ -1,36 +1,9 @@
 ﻿open System
 open System.Threading
 open System.Windows.Forms
-open Wautoma.KeysTypes
 open Wautoma.UIStuff
 open Wautoma.Async
-open Wautoma.UIAutomation.AutomationExamples
-
-
-let hotkeys: Hotkeys =
-    [ { Keys = KeyCombo.Parse("Win+Shift+X")
-        Action = openGmail
-        Description = "Open Gmail" }
-      { Keys = KeyCombo.Parse("Win+N")
-        Action = openNotepadPlusPlus
-        Description = "Open Notepad++" }
-      { Keys = KeyCombo.Parse("Win+W")
-        Action = openFoobar2000
-        Description = "Open foobar2000" }
-      { Keys = KeyCombo.Parse("Win+C")
-        Action = openWindowsTerminal
-        Description = "Open foobar2000" }
-      { Keys = KeyCombo.Parse("Win+J")
-        Action = rightClick
-        Description = "Right mouse click" }
-      { Keys = KeyCombo.Parse("Win+H")
-        Action = hibernate
-        Description = "Hibernate" }
-      { Keys = KeyCombo.Parse("Win+E")
-        Action = openFm
-        Description = "Open fm" } ]
-    |> List.map (fun x -> x.Keys, x)
-    |> Map.ofSeq
+open Wautoma.MyHotkeys
 
 
 [<EntryPoint; STAThread>]

@@ -22,6 +22,7 @@
         <Compile Include="UIAutomation\AutomationExamples.fs" />
         <Compile Include="KeyboardHandling.fs" />
         <Compile Include="UIStuff.fs" />
+        <Compile Include="MyHotkeys.fs" />
         <Compile Include="Program.fs" />
         <Content Include=".fantomasignore" />
         <Content Include="icon.ico">
