@@ -9,6 +9,8 @@ ProjectSection(SolutionItems) = preProject
 	build.fsx = build.fsx
 	.gitignore = .gitignore
 	build.bat = build.bat
+	..\LICENSE = ..\LICENSE
+	..\README.md = ..\README.md
 EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Wautoma.Tests", "Wautoma.Tests\Wautoma.Tests.fsproj", "{F6739E02-7070-487D-9F56-28F20FBA456C}"
