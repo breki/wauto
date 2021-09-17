@@ -5,6 +5,7 @@ open System.IO
 open Wautoma.KeysTypes
 open Wautoma.Logging
 open Wautoma.UIAutomation.AutomationExamples
+open Wautoma.UIAutomation.Processes
 
 
 let openGmail (loggingFunc: LoggingFunc) : unit =
@@ -66,12 +67,13 @@ let openFoobar2000 (_: LoggingFunc) : unit =
         |> runProgram
 
 let openWindowsTerminal (_: LoggingFunc) : unit =
-    let appFormMaybe =
-        allMainWindows ()
-        |> Seq.tryFind (nameStartsWith "WinTerm")
+    let wtProcesses = allProcessesWithName "WindowsTerminal"
 
-    match appFormMaybe with
-    | Some appForm -> appForm |> activate |> focus |> ignore
+    match Array.tryHead wtProcesses with
+    | Some wtProcess ->
+        windowOfProcess wtProcess.Id
+        |> Option.map (fun el -> el |> activate |> focus)
+        |> ignore
     | None -> "wt.exe" |> runProgram
 
 

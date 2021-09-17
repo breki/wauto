@@ -18,6 +18,12 @@ let allMainWindows () =
     }
 
 
+let windowOfProcess processId =
+    let automationElementProcess (el: AutomationElement) = el.Current.ProcessId
+
+    allMainWindows ()
+    |> Seq.tryFind (fun el -> el |> automationElementProcess = processId)
+
 let allWindowsHandlesForProcess processId =
     let rec run current acc =
         let found =

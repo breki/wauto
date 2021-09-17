@@ -8,33 +8,34 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="System.Windows.Forms"/>
-        <Reference Include="UIAutomationClient"/>
-        <Reference Include="UIAutomationTypes"/>
+        <Reference Include="System.Windows.Forms" />
+        <Reference Include="UIAutomationClient" />
+        <Reference Include="UIAutomationTypes" />
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="Logging.fs"/>
-        <Compile Include="Async.fs"/>
-        <Compile Include="Settings.fs"/>
-        <Compile Include="NativeApi.fs"/>
-        <Compile Include="KeysNames.fs"/>
-        <Compile Include="KeysTypes.fs"/>
-        <Compile Include="UIAutomation\AutomationExamples.fs"/>
-        <Compile Include="KeyboardHandling.fs"/>
-        <Compile Include="UIStuff.fs"/>
-        <Compile Include="MyHotkeys.fs"/>
-        <Compile Include="Program.fs"/>
-        <Content Include=".fantomasignore"/>
+        <Compile Include="Logging.fs" />
+        <Compile Include="Async.fs" />
+        <Compile Include="Settings.fs" />
+        <Compile Include="NativeApi.fs" />
+        <Compile Include="KeysNames.fs" />
+        <Compile Include="KeysTypes.fs" />
+        <Compile Include="UIAutomation\Processes.fs" />
+        <Compile Include="UIAutomation\AutomationExamples.fs" />
+        <Compile Include="KeyboardHandling.fs" />
+        <Compile Include="UIStuff.fs" />
+        <Compile Include="MyHotkeys.fs" />
+        <Compile Include="Program.fs" />
+        <Content Include=".fantomasignore" />
         <Content Include="icon.ico">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Include="icon.pdn"/>
+        <Content Include="icon.pdn" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Update="FSharp.Core" Version="5.0.2"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
+        <PackageReference Update="FSharp.Core" Version="5.0.2" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     </ItemGroup>
 
 </Project>
