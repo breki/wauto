@@ -46,3 +46,45 @@ when Windows start, so you would not need to manually open applications and move
 them to their designated virtual desktops. There are also some other ideas I
 have around this, but first I need to investigate what kind of API Microsoft
 provides for virtual desktops and how flexible it is.
+
+## How to use
+
+As this is still a prototype, you need to [build](#How-to-build) the application
+before using it. Once you have successfully built the binaries, follow these
+steps to setup the application:
+
+1. Copy all of the files from the build directory to somewhere on your disk.
+2. Press `Win+R` to open the `Run` dialog.
+3. In the dialog, enter `shell:startup` and press the `Enter` key. This will
+   open Windows Explorer in the `Startup` directory where Windows users can
+   define which applications they want Windows to automatically start during the
+   OS startup.
+4. Right-click in the Windows Explorer window and choose `New` / `Shortcut` menu
+   item.
+5. In the `Create Shortcut` dialog, browse to the path of the `Wautoma.exe` file
+   you copied in the first step. Click on the `Next` button.
+6. Put `Wautoma` as the name of the shortcut. Click on the `Next` button.
+7. You should now have a new `Wautoma` shortcut file shown by the Windows
+   Explorer. The next time you restart Windows, Wautoma will be automatically
+   started.
+8. Double-click on the shortcut to start the application now, so you do not need
+   to restart Windows.
+
+TODO: Dropbox hack
+
+TODO: about defining hotkeys
+
+## How to build
+
+In order to build Wautoma, you need .NET 4.8 or higher. And, obviously, you need
+to fetch the latest source code from
+the [github repository](https://github.com/breki/wauto). Then follow these
+steps:
+
+1. Open command line terminal and move to the `Wautoma` subdirectory of the
+   repository.
+2. Run `build.bat` build script.
+3. If everything goes well, the build binaries should be waiting for you in
+   the `Wautoma\Wautoma\bin\Release\net48\publish` directory.
+
+## TODO: Technical details

@@ -2,12 +2,10 @@
 
 open System
 open System.Diagnostics
-open System.IO
 open System.Runtime.InteropServices
 open System.Threading
 open System.Windows.Automation
 open System.Windows.Forms
-open Wautoma.Logging
 open Wautoma.NativeApi
 
 let allChildren =
