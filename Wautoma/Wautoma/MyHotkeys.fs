@@ -78,6 +78,8 @@ let openWindowsTerminal (_: LoggingFunc) : unit =
         |> ignore
     | None -> "wt.exe" |> runProgram
 
+let openWindowsExplorer _ = "explorer.exe" |> runProgram
+
 
 
 let hotkeys: Hotkeys =
@@ -101,6 +103,9 @@ let hotkeys: Hotkeys =
         Description = "Hibernate" }
       { Keys = KeyCombo.Parse("Win+E")
         Action = openFm
-        Description = "Open fm" } ]
+        Description = "Open fm" }
+      { Keys = KeyCombo.Parse("Shift+Win+E")
+        Action = openWindowsExplorer
+        Description = "Open Windows Explorer" } ]
     |> List.map (fun x -> x.Keys, x)
     |> Map.ofSeq
