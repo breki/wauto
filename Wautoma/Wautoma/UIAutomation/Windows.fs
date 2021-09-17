@@ -1,9 +1,7 @@
-﻿module Wautoma.UIAutomation.AutomationExamples
+﻿module Wautoma.UIAutomation.Windows
 
 open System
-open System.Diagnostics
 open System.Runtime.InteropServices
-open System.Threading
 open System.Windows.Automation
 open System.Windows.Forms
 open Wautoma.NativeApi
@@ -150,22 +148,3 @@ let activate (el: AutomationElement) : AutomationElement =
 let focus (el: AutomationElement) : AutomationElement =
     el.SetFocus()
     el
-
-let rightClick _ =
-    let mutable cursorPos = MousePoint()
-    GetCursorPos(&cursorPos) |> ignore
-
-    mouse_event (int MouseEventFlags.RightUp, cursorPos.x, cursorPos.y, 0, 0)
-
-let hibernate _ =
-    Application.SetSuspendState(PowerState.Hibernate, true, true)
-    |> ignore
-
-let runProgram filename : unit =
-    let procStartInfo =
-        ProcessStartInfo(FileName = filename, UseShellExecute = false)
-
-    let proc = new Process(StartInfo = procStartInfo)
-    proc.Start() |> ignore
-
-let pause (time: int) = Thread.Sleep(time)

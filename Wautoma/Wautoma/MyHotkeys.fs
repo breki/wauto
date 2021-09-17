@@ -4,8 +4,10 @@ open System
 open System.IO
 open Wautoma.KeysTypes
 open Wautoma.Logging
-open Wautoma.UIAutomation.AutomationExamples
 open Wautoma.UIAutomation.Processes
+open Wautoma.UIAutomation.Windows
+open Wautoma.UIAutomation.Misc
+open Wautoma.UIAutomation.Mouse
 
 
 let openGmail (loggingFunc: LoggingFunc) : unit =
