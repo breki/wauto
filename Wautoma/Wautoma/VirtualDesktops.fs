@@ -9,6 +9,59 @@ open Microsoft.Win32
 
 type VirtualDesktopId = Guid
 
+
+let virtualDesktopIdsFromRegistry () : VirtualDesktopId [] =
+    use key =
+        Registry.CurrentUser.OpenSubKey(
+            @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VirtualDesktops"
+        )
+
+    let guidsByteArray =
+        key.GetValue("VirtualDesktopIDs") :?> byte []
+
+    guidsByteArray
+    |> Array.chunkBySize 16
+    |> Array.map Guid
+
+
+
+let virtualDesktopName (virtualDesktopId: VirtualDesktopId) =
+    let idGuid = virtualDesktopId.ToString("B")
+
+    let keyName =
+        @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\"
+        + $@"VirtualDesktops\Desktops\%s{idGuid}"
+
+    use key = Registry.CurrentUser.OpenSubKey(keyName)
+
+    if key <> null then
+        key.GetValue "Name" |> string |> Some
+    else
+        None
+
+
+let virtualDesktopNames () =
+    use key =
+        Registry.CurrentUser.OpenSubKey(
+            @"SOFTWARE\Microsoft\Windows\CurrentVersion\"
+            + @"Explorer\VirtualDesktops\Desktops"
+        )
+
+    key.GetSubKeyNames()
+    |> Array.map
+        (fun subkeyName ->
+            let desktopId: VirtualDesktopId = Guid.Parse(subkeyName)
+            desktopId, (desktopId |> virtualDesktopName))
+    |> Array.map
+        (fun (id, name) ->
+            match name with
+            | Some name -> id, name
+            | None ->
+                invalidOp
+                    "BUG: virtual desktop name should always be specified here")
+    |> Map.ofArray
+
+
 module internal CLSIDs =
     let ImmersiveShell =
         Guid("c2f03a33-21f5-47fa-b4bb-156362a2f239")
@@ -127,10 +180,20 @@ type Desktop
         manager: IVirtualDesktopManagerInternal,
         desktop: IVirtualDesktop,
         applicationViewCollection: IApplicationViewCollection,
-        n
+        desktopOrdinalNumber
     ) =
-    member this.N = n
+
+    let mutable desktopName: string = ""
+
+    do
+        desktopName <-
+            match virtualDesktopName (desktop.GetId()) with
+            | Some name -> name
+            | None -> $"Desktop %i{desktopOrdinalNumber}"
+
+    member this.OrdinalNumber = desktopOrdinalNumber
     member this.Id = desktop.GetId()
+    member this.Name = desktopName
 
     member this.MoveWindowTo(hWnd: IntPtr) =
         match applicationViewCollection.GetViewForHwnd(hWnd) with
@@ -170,18 +233,20 @@ type Manager
         let rawDesktops = managerInternal.GetDesktops()
 
         seq {
-            for i = 0 to managerInternal.GetCount() - 1 do
+            for desktopOrdinalNumber = 1 to managerInternal.GetCount() do
                 let mutable rrid: VirtualDesktopId =
                     typeof<IVirtualDesktop>.GUID
 
-                let nativeDesktop = rawDesktops.GetAt(i, &rrid)
+                let nativeDesktop =
+                    rawDesktops.GetAt(desktopOrdinalNumber - 1, &rrid)
+                    :?> IVirtualDesktop
 
                 let desktop =
                     Desktop(
                         managerInternal,
-                        nativeDesktop :?> IVirtualDesktop,
+                        nativeDesktop,
                         applicationViewCollection,
-                        i + 1
+                        desktopOrdinalNumber
                     )
 
                 yield desktop
@@ -216,60 +281,9 @@ let createVirtualDesktopsManager () =
     serviceGuid <- CLSIDs.VirtualDesktopNotificationService
     riid <- typeof<IVirtualDesktopNotificationService>.GUID
 
-    let notificationService =
-        shell.QueryService(&serviceGuid, &riid)
-        :?> IVirtualDesktopNotificationService
+    // if we ever need notifications, use this code
+//    let notificationService =
+//        shell.QueryService(&serviceGuid, &riid)
+//        :?> IVirtualDesktopNotificationService
 
     Manager(manager, managerInternal, applicationViewCollection)
-
-
-let virtualDesktopIdsFromRegistry () : VirtualDesktopId [] =
-    use key =
-        Registry.CurrentUser.OpenSubKey(
-            @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VirtualDesktops"
-        )
-
-    let guidsByteArray =
-        key.GetValue("VirtualDesktopIDs") :?> byte []
-
-    guidsByteArray
-    |> Array.chunkBySize 16
-    |> Array.map Guid
-
-
-
-let virtualDesktopName (virtualDesktopId: VirtualDesktopId) =
-    let idGuid = virtualDesktopId.ToString("B")
-
-    let keyName =
-        @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\"
-        + $@"VirtualDesktops\Desktops\%s{idGuid}"
-
-    use key = Registry.CurrentUser.OpenSubKey(keyName)
-
-    if key <> null then
-        key.GetValue "Name" |> string |> Some
-    else
-        None
-
-
-let virtualDesktopNames () =
-    use key =
-        Registry.CurrentUser.OpenSubKey(
-            @"SOFTWARE\Microsoft\Windows\CurrentVersion\"
-            + @"Explorer\VirtualDesktops\Desktops"
-        )
-
-    key.GetSubKeyNames()
-    |> Array.map
-        (fun subkeyName ->
-            let desktopId: VirtualDesktopId = Guid.Parse(subkeyName)
-            desktopId, (desktopId |> virtualDesktopName))
-    |> Array.map
-        (fun (id, name) ->
-            match name with
-            | Some name -> id, name
-            | None ->
-                invalidOp
-                    "BUG: virtual desktop name should always be specified here")
-    |> Map.ofArray

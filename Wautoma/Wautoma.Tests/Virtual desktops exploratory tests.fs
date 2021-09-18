@@ -1,7 +1,6 @@
 ﻿module Tests.``Virtual desktops exploratory tests``
 
 open System
-open Microsoft.Win32
 open Wautoma.VirtualDesktops
 open Xunit
 open Swensen.Unquote
@@ -9,8 +8,10 @@ open Swensen.Unquote
 [<Fact>]
 let ``listing all virtual desktops using VD API`` () =
     let manager = createVirtualDesktopsManager ()
-    let desktops = manager.ListDesktops()
+    let desktops = manager.ListDesktops() |> Seq.toArray
     test <@ desktops |> Seq.length = 4 @>
+    test <@ desktops.[0].Name = "Main" @>
+    test <@ desktops.[1].Name = "Desktop 2" @>
 
 [<Fact>]
 let ``listing all virtual desktop GUIDs`` () =
