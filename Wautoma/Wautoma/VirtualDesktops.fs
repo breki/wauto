@@ -5,6 +5,9 @@
 
 open System
 open System.Runtime.InteropServices
+open Microsoft.Win32
+
+type VirtualDesktopId = Guid
 
 module internal CLSIDs =
     let ImmersiveShell =
@@ -62,7 +65,7 @@ type internal IApplicationViewCollection =
   Guid("ff72ffdd-be7e-43fc-9c03-ad81681e88e4")>]
 type internal IVirtualDesktop =
     abstract IsViewVisible : obj -> bool
-    abstract GetId : unit -> Guid
+    abstract GetId : unit -> VirtualDesktopId
 
 [<ComImport;
   InterfaceType(ComInterfaceType.InterfaceIsIUnknown);
@@ -71,7 +74,7 @@ type internal IVirtualDesktopManager =
     abstract IsWindowOnCurrentVirtualDesktop : IntPtr -> bool
 
     [<PreserveSig>]
-    abstract GetWindowDesktopId : IntPtr * outref<Guid> -> int
+    abstract GetWindowDesktopId : IntPtr * outref<VirtualDesktopId> -> int
 
 [<ComImport;
   InterfaceType(ComInterfaceType.InterfaceIsIUnknown);
@@ -89,7 +92,7 @@ type internal IVirtualDesktopManagerInternal =
     abstract SwitchDesktop : desktop: IVirtualDesktop -> unit
     abstract CreateDesktopW : unit -> IVirtualDesktop
     abstract RemoveDesktop : IVirtualDesktop -> IVirtualDesktop -> unit
-    abstract FindDesktop : inref<Guid> -> IVirtualDesktop
+    abstract FindDesktop : inref<VirtualDesktopId> -> IVirtualDesktop
 
 [<ComImport;
   InterfaceType(ComInterfaceType.InterfaceIsIUnknown);
@@ -144,10 +147,10 @@ type Manager
         applicationViewCollection: IApplicationViewCollection
     ) as self =
 
-    let mutable desktopCache: Map<Guid, Desktop> = Map.empty
+    let mutable desktops: Map<VirtualDesktopId, Desktop> = Map.empty
 
     do
-        desktopCache <-
+        desktops <-
             self.ListDesktops()
             |> Seq.map (fun (desktop: Desktop) -> desktop.Id, desktop)
             |> Map.ofSeq
@@ -155,12 +158,12 @@ type Manager
     member this.GetCurrentDesktop() =
         let virtualDesktop = managerInternal.GetCurrentDesktop()
         // Should always be present (famous last words)
-        desktopCache.[virtualDesktop.GetId()]
+        desktops.[virtualDesktop.GetId()]
 
     member this.GetDesktop(window: IntPtr) =
         match manager.GetWindowDesktopId(window) with
-        | 0, desktopId when desktopId = Guid.Empty -> None
-        | 0, desktopId -> desktopCache.[desktopId] |> Some
+        | 0, desktopId when desktopId = VirtualDesktopId.Empty -> None
+        | 0, desktopId -> desktops.[desktopId] |> Some
         | _, _ -> None
 
     member this.ListDesktops() =
@@ -168,7 +171,9 @@ type Manager
 
         seq {
             for i = 0 to managerInternal.GetCount() - 1 do
-                let mutable rrid = typeof<IVirtualDesktop>.GUID
+                let mutable rrid: VirtualDesktopId =
+                    typeof<IVirtualDesktop>.GUID
+
                 let nativeDesktop = rawDesktops.GetAt(i, &rrid)
 
                 let desktop =
@@ -216,3 +221,55 @@ let createVirtualDesktopsManager () =
         :?> IVirtualDesktopNotificationService
 
     Manager(manager, managerInternal, applicationViewCollection)
+
+
+let virtualDesktopIdsFromRegistry () : VirtualDesktopId [] =
+    use key =
+        Registry.CurrentUser.OpenSubKey(
+            @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VirtualDesktops"
+        )
+
+    let guidsByteArray =
+        key.GetValue("VirtualDesktopIDs") :?> byte []
+
+    guidsByteArray
+    |> Array.chunkBySize 16
+    |> Array.map Guid
+
+
+
+let virtualDesktopName (virtualDesktopId: VirtualDesktopId) =
+    let idGuid = virtualDesktopId.ToString("B")
+
+    let keyName =
+        @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\"
+        + $@"VirtualDesktops\Desktops\%s{idGuid}"
+
+    use key = Registry.CurrentUser.OpenSubKey(keyName)
+
+    if key <> null then
+        key.GetValue "Name" |> string |> Some
+    else
+        None
+
+
+let virtualDesktopNames () =
+    use key =
+        Registry.CurrentUser.OpenSubKey(
+            @"SOFTWARE\Microsoft\Windows\CurrentVersion\"
+            + @"Explorer\VirtualDesktops\Desktops"
+        )
+
+    key.GetSubKeyNames()
+    |> Array.map
+        (fun subkeyName ->
+            let desktopId: VirtualDesktopId = Guid.Parse(subkeyName)
+            desktopId, (desktopId |> virtualDesktopName))
+    |> Array.map
+        (fun (id, name) ->
+            match name with
+            | Some name -> id, name
+            | None ->
+                invalidOp
+                    "BUG: virtual desktop name should always be specified here")
+    |> Map.ofArray
