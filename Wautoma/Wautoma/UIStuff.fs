@@ -27,12 +27,49 @@ type AppForm(hotkeys: Hotkeys) as this =
     let logActivity msg =
         logActivityIntoTextBox loggingTextBox msg
 
-    let notifyIcon = new NotifyIcon(components)
+    let taskbarIcon = new NotifyIcon(components)
 
     let keyboardHandler =
         new KeyboardHandler(hotkeys, logActivity)
 
     let settingsFileName = "Wautoma-settings.json"
+
+    let restoreLogWindowPositionAndSizeFromSettingsFile () =
+        let settings = loadSettings settingsFileName
+
+        let x =
+            settings |> getSettingInt "form.x" 10 |> max 0
+
+        let y =
+            settings |> getSettingInt "form.y" 10 |> max 0
+
+        let width =
+            settings
+            |> getSettingInt "form.width" 500
+            |> max 300
+
+        let height =
+            settings
+            |> getSettingInt "form.height" 500
+            |> max 200
+
+        this.Location <- Point(x, y)
+        this.Width <- width
+        this.Height <- height
+
+    let createLoggingTextBox () =
+        loggingTextBox.Anchor <-
+            AnchorStyles.Top
+            ||| AnchorStyles.Right
+            ||| AnchorStyles.Bottom
+            ||| AnchorStyles.Left
+
+        loggingTextBox.Multiline <- true
+        loggingTextBox.ReadOnly <- true
+        loggingTextBox.Dock <- DockStyle.Fill
+        loggingTextBox.ScrollBars <- ScrollBars.Vertical
+
+        this.Controls.Add(loggingTextBox)
 
     let showLogWindow _ _ =
         this.Show()
@@ -99,55 +136,12 @@ type AppForm(hotkeys: Hotkeys) as this =
     let suspendResumeMenuItem = menuItem "Suspend Hotkeys" None
     let debugLoggingMenuItem = menuItem "Enable Debug Logging" None
 
-    do
-        let settings = loadSettings settingsFileName
-
-        this.Text <- "Wautoma"
-        this.StartPosition <- FormStartPosition.Manual
-
-        let x =
-            settings |> getSettingInt "form.x" 10 |> max 0
-
-        let y =
-            settings |> getSettingInt "form.y" 10 |> max 0
-
-        let width =
-            settings
-            |> getSettingInt "form.width" 500
-            |> max 300
-
-        let height =
-            settings
-            |> getSettingInt "form.height" 500
-            |> max 200
-
-        this.Location <- Point(x, y)
-        this.Width <- width
-        this.Height <- height
-        this.ShowInTaskbar <- false
-
-        let icon = new Icon("icon.ico")
-
-        this.Icon <- icon
-
-        loggingTextBox.Anchor <-
-            AnchorStyles.Top
-            ||| AnchorStyles.Right
-            ||| AnchorStyles.Bottom
-            ||| AnchorStyles.Left
-
-        loggingTextBox.Multiline <- true
-        loggingTextBox.ReadOnly <- true
-        loggingTextBox.Dock <- DockStyle.Fill
-        loggingTextBox.ScrollBars <- ScrollBars.Vertical
-
-        this.Controls.Add(loggingTextBox)
-
-        notifyIcon.Icon <- icon
-        notifyIcon.Visible <- true
+    let createTaskbarIcon icon =
+        taskbarIcon.Icon <- icon
+        taskbarIcon.Visible <- true
 
         MouseEventHandler showLogWindowOnLeftClick
-        |> notifyIcon.MouseClick.AddHandler
+        |> taskbarIcon.MouseClick.AddHandler
 
         onMenuItemClick
             suspendResumeMenuItem
@@ -157,7 +151,7 @@ type AppForm(hotkeys: Hotkeys) as this =
             debugLoggingMenuItem
             (toggleDebugLogging debugLoggingMenuItem)
 
-        notifyIcon.ContextMenu <-
+        taskbarIcon.ContextMenu <-
             new ContextMenu(
                 [| menuItem "Show Log Window" (Some showLogWindow)
                    menuItemsSeparator ()
@@ -166,6 +160,19 @@ type AppForm(hotkeys: Hotkeys) as this =
                    menuItemsSeparator ()
                    menuItem "Exit" (Some exit) |]
             )
+
+    do
+        this.Text <- "Wautoma"
+        this.StartPosition <- FormStartPosition.Manual
+        this.ShowInTaskbar <- false
+
+        let icon = new Icon("icon.ico")
+        this.Icon <- icon
+
+        restoreLogWindowPositionAndSizeFromSettingsFile ()
+
+        createLoggingTextBox ()
+        createTaskbarIcon icon
 
         keyboardHandler.Start()
 
