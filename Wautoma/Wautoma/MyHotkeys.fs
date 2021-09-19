@@ -11,7 +11,7 @@ open Wautoma.UIAutomation.Mouse
 open Wautoma.VirtualDesktops
 
 
-let openGmail (loggingFunc: LoggingFunc) : unit =
+let goToChromeTab tabName (loggingFunc: LoggingFunc) : unit =
     let chromeMaybe =
         allMainWindows ()
         |> Seq.tryFind (nameEndsWith "Google Chrome")
@@ -22,10 +22,11 @@ let openGmail (loggingFunc: LoggingFunc) : unit =
         pause 250
         "+^A" |> sendKeys loggingFunc
         pause 500
-        "gmail" |> sendKeys loggingFunc
+        tabName |> sendKeys loggingFunc
         pause 250
         "{ENTER}" |> sendKeys loggingFunc
     | None -> ()
+
 
 let openNotepadPlusPlus (_: LoggingFunc) : unit =
     let notepadMaybe =
@@ -94,9 +95,18 @@ let switchToDesktop desktopNumber (_: LoggingFunc) =
 
 
 let hotkeys: Hotkeys =
-    [ { Keys = KeyCombo.Parse("Win+Shift+X")
-        Action = openGmail
+    [ { Keys = KeyCombo.Parse("Win+Shift+G")
+        Action = goToChromeTab "gmail"
         Description = "Open Gmail" }
+      { Keys = KeyCombo.Parse("Win+Shift+O")
+        Action = goToChromeTab "todoist"
+        Description = "Open Todoist" }
+      { Keys = KeyCombo.Parse("Win+Shift+L")
+        Action = goToChromeTab "calendar"
+        Description = "Open Google Calendar" }
+      { Keys = KeyCombo.Parse("Win+Shift+Q")
+        Action = goToChromeTab "clockify"
+        Description = "Open Clockify" }
       { Keys = KeyCombo.Parse("Win+N")
         Action = openNotepadPlusPlus
         Description = "Open Notepad++" }

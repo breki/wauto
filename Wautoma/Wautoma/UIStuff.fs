@@ -2,10 +2,14 @@
 
 open System
 open System.Drawing
+open System.Reflection
 open System.Windows.Forms
 open Wautoma.KeyboardHandling
 open Wautoma.KeysTypes
 open Wautoma.Settings
+
+let wautomaVersion () =
+    Assembly.GetExecutingAssembly().GetName().Version
 
 type EventHandlerFunc = obj -> EventArgs -> unit
 
@@ -139,6 +143,7 @@ type AppForm(hotkeys: Hotkeys) as this =
     let createTaskbarIcon icon =
         taskbarIcon.Icon <- icon
         taskbarIcon.Visible <- true
+        taskbarIcon.Text <- $"Wautoma %A{wautomaVersion ()}"
 
         MouseEventHandler showLogWindowOnLeftClick
         |> taskbarIcon.MouseClick.AddHandler
@@ -162,7 +167,7 @@ type AppForm(hotkeys: Hotkeys) as this =
             )
 
     do
-        this.Text <- "Wautoma"
+        this.Text <- $"Wautoma %A{wautomaVersion ()}"
         this.StartPosition <- FormStartPosition.Manual
         this.ShowInTaskbar <- false
 
