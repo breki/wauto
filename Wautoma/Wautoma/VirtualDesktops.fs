@@ -228,7 +228,7 @@ type Manager
         | 0, desktopId when desktopId = VirtualDesktopId.Empty -> None
         | 0, desktopId -> desktops.[desktopId] |> Some
         | _, _ -> None
-
+        
     member this.ListDesktops() =
         let rawDesktops = managerInternal.GetDesktops()
 

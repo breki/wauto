@@ -32,3 +32,16 @@ let ``getting virtual desktop names from the registry`` () =
         Guid.Parse("{430FBCBF-F402-4399-AF83-6BAE450B7EAD}")
 
     test <@ desktopNames.[desktopId] = "Main" @>
+
+//[<Fact>]
+let ``Can switch to another desktop`` () =
+    let manager = createVirtualDesktopsManager ()
+
+    let differentDesktop =
+        manager.ListDesktops()
+        |> Seq.toList
+        |> List.item 1
+
+    differentDesktop.SwitchTo()
+
+    test <@ true @>
