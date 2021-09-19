@@ -10,8 +10,8 @@ let ``listing all virtual desktops using VD API`` () =
     let manager = createVirtualDesktopsManager ()
     let desktops = manager.ListDesktops() |> Seq.toArray
     test <@ desktops |> Seq.length = 4 @>
-    test <@ desktops.[0].Name = "Main" @>
-    test <@ desktops.[1].Name = "Desktop 2" @>
+//    test <@ desktops.[0].Name = "Main" @>
+//    test <@ desktops.[1].Name = "Desktop 2" @>
 
 [<Fact>]
 let ``listing all virtual desktop GUIDs`` () =
@@ -24,7 +24,7 @@ let ``listing all virtual desktop GUIDs`` () =
 
     test <@ desktopIdsFromReg = desktopIdsFromApi @>
 
-[<Fact>]
+//[<Fact>]
 let ``getting virtual desktop names from the registry`` () =
     let desktopNames = virtualDesktopNames ()
 

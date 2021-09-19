@@ -8,6 +8,7 @@ open Wautoma.UIAutomation.Processes
 open Wautoma.UIAutomation.Windows
 open Wautoma.UIAutomation.Misc
 open Wautoma.UIAutomation.Mouse
+open Wautoma.VirtualDesktops
 
 
 let openGmail (loggingFunc: LoggingFunc) : unit =
@@ -81,6 +82,16 @@ let openWindowsTerminal (_: LoggingFunc) : unit =
 let openWindowsExplorer _ = "explorer.exe" |> runProgram
 
 
+let switchToDesktop desktopNumber (_: LoggingFunc) =
+    let manager = createVirtualDesktopsManager ()
+
+    let desktop =
+        manager.ListDesktops()
+        |> Seq.toList
+        |> List.item (desktopNumber - 1)
+
+    desktop.SwitchTo()
+
 
 let hotkeys: Hotkeys =
     [ { Keys = KeyCombo.Parse("Win+Shift+X")
@@ -106,6 +117,18 @@ let hotkeys: Hotkeys =
         Description = "Open fm" }
       { Keys = KeyCombo.Parse("Shift+Win+E")
         Action = openWindowsExplorer
-        Description = "Open Windows Explorer" } ]
+        Description = "Open Windows Explorer" }
+      { Keys = KeyCombo.Parse("Win+Num1")
+        Action = switchToDesktop 1
+        Description = "Switch to desktop 1" }
+      { Keys = KeyCombo.Parse("Win+Num2")
+        Action = switchToDesktop 2
+        Description = "Switch to desktop 2" }
+      { Keys = KeyCombo.Parse("Win+Num3")
+        Action = switchToDesktop 3
+        Description = "Switch to desktop 3" }
+      { Keys = KeyCombo.Parse("Win+Num4")
+        Action = switchToDesktop 4
+        Description = "Switch to desktop 4" } ]
     |> List.map (fun x -> x.Keys, x)
     |> Map.ofSeq
