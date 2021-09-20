@@ -7,6 +7,7 @@ open Wautoma.Logging
 open Wautoma.UIAutomation.Processes
 open Wautoma.UIAutomation.Windows
 open Wautoma.UIAutomation.Misc
+open Wautoma.UIAutomation.Keyboard
 open Wautoma.UIAutomation.Mouse
 open Wautoma.VirtualDesktops
 
@@ -20,7 +21,7 @@ let goToChromeTab tabName (loggingFunc: LoggingFunc) : unit =
     | Some chrome ->
         chrome |> activate |> focus |> ignore
         pause 250
-        "+^A" |> sendKeys loggingFunc
+        "+^{a}" |> sendKeys loggingFunc
         pause 500
         tabName |> sendKeys loggingFunc
         pause 250

@@ -3,7 +3,6 @@
 open System
 open System.Runtime.InteropServices
 open System.Windows.Automation
-open System.Windows.Forms
 open Wautoma.NativeApi
 
 let allChildren =
@@ -63,14 +62,6 @@ let nameIs text (el: AutomationElement) =
         |> string
 
     name = text
-
-let sendKeys loggingFunc keysStr =
-    try
-        $"Sending keys %s{keysStr}" |> loggingFunc
-        SendKeys.SendWait(keysStr)
-    with
-    | :? InvalidOperationException as ex ->
-        $"InvalidOperationException %A{ex}" |> loggingFunc
 
 let getWindowPattern (el: AutomationElement) : WindowPattern option =
     try
