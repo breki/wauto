@@ -24,6 +24,7 @@
         <Compile Include="UIAutomation\Processes.fs" />
         <Compile Include="UIAutomation\Windows.fs" />
         <Compile Include="UIAutomation\Misc.fs" />
+        <Compile Include="UIAutomation\Keyboard.fs" />
         <Compile Include="UIAutomation\Mouse.fs" />
         <Compile Include="KeyboardHandling.fs" />
         <Compile Include="UIStuff.fs" />
@@ -34,6 +35,7 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Content Include="icon.pdn" />
+        <None Include="App.config" />
     </ItemGroup>
 
     <ItemGroup>
