@@ -97,6 +97,11 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
                         $"currentlyPressedKeys after=%A{currentlyPressedKeys}"
                         |> loggingFunc
 
+                    if currentlyPressedKeys = KeyCombo.Empty then
+                        allKeysDepressedEvent.Set() |> ignore
+                    else
+                        allKeysDepressedEvent.Reset() |> ignore
+
                     if newKeystroke then
                         match hotkeys.TryFind currentlyPressedKeys, suspended with
                         | Some hotkey, false ->

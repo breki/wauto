@@ -3,4 +3,4 @@
 open Wautoma.MyHotkeys
 
 //[<Fact>]
-let ``moving to GMail`` () = openGmail (fun x -> printf $"%s{x}")
+let ``moving to GMail`` () = 12 (fun x -> printf $"%s{x}")

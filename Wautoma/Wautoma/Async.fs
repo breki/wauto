@@ -4,6 +4,12 @@ open System.Threading
 open Wautoma.Logging
 
 
+let allKeysDepressedEvent = new ManualResetEvent(false)
+
+let waitForAllKeysToBeDepressed () =
+    allKeysDepressedEvent.WaitOne(10 * 1000) |> ignore
+
+
 let safeAction action logActivity =
     try
         action logActivity

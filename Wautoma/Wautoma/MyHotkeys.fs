@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open Wautoma.Async
 open Wautoma.KeysTypes
 open Wautoma.Logging
 open Wautoma.UIAutomation.Processes
@@ -19,7 +20,8 @@ let goToChromeTab tabName (loggingFunc: LoggingFunc) : unit =
     match chromeMaybe with
     | Some chrome ->
         chrome |> activate |> focus |> ignore
-        pause 250
+        waitForAllKeysToBeDepressed ()
+        //        pause 250
         "+^A" |> sendKeys loggingFunc
         pause 500
         tabName |> sendKeys loggingFunc
