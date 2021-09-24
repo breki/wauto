@@ -13,6 +13,8 @@ open Wautoma.UIAutomation.Mouse
 open Wautoma.VirtualDesktops
 
 
+let virtualDesktopsManager = createVirtualDesktopsManager ()
+
 let goToChromeTab tabName (loggingFunc: LoggingFunc) : unit =
     let chromeMaybe =
         allMainWindows ()
@@ -87,10 +89,8 @@ let openWindowsExplorer _ = "explorer.exe" |> runProgram
 
 
 let switchToDesktop desktopNumber (_: LoggingFunc) =
-    let manager = createVirtualDesktopsManager ()
-
     let desktop =
-        manager.ListDesktops()
+        virtualDesktopsManager.ListDesktops()
         |> Seq.toList
         |> List.item (desktopNumber - 1)
 
