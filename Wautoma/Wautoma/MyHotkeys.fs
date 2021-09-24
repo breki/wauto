@@ -97,6 +97,18 @@ let switchToDesktop desktopNumber (_: LoggingFunc) =
     desktop.SwitchTo()
 
 
+let dumpAllWindows (loggingFunc: LoggingFunc) =
+    loggingFunc ""
+    loggingFunc "Dumping all open windows:"
+
+    allMainWindows ()
+    |> Seq.iter
+        (fun el ->
+            $"%s{el.Current.Name} | {el.Current.ClassName}"
+            |> loggingFunc)
+
+    loggingFunc "-------------"
+
 let hotkeys: Hotkeys =
     [ { Keys = KeyCombo.Parse("Win+Shift+G")
         Action = goToChromeTab "gmail"
@@ -142,6 +154,9 @@ let hotkeys: Hotkeys =
         Description = "Switch to desktop 3" }
       { Keys = KeyCombo.Parse("Win+Num4")
         Action = switchToDesktop 4
-        Description = "Switch to desktop 4" } ]
+        Description = "Switch to desktop 4" }
+      { Keys = KeyCombo.Parse("Shift+Win+Num9")
+        Action = dumpAllWindows
+        Description = "Dump all currently open windows to the log" } ]
     |> List.map (fun x -> x.Keys, x)
     |> Map.ofSeq
