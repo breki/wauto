@@ -1,7 +1,9 @@
 ﻿module Tests.``Virtual desktops exploratory tests``
 
 open System
+open System.Diagnostics
 open Wautoma.VirtualDesktops
+open Wautoma.UIAutomation.Processes
 open Xunit
 open Swensen.Unquote
 
@@ -45,3 +47,10 @@ let ``Can switch to another desktop`` () =
     differentDesktop.SwitchTo()
 
     test <@ true @>
+
+//[<Fact>]
+let ``pinning windows works`` () =
+    let ``process`` = (allProcessesWithName "foobar2000").[0]
+    let hwnd = ``process``.MainWindowHandle
+    //    virtualDesktopsManager.PinApplication hwnd
+    virtualDesktopsManager.PinWindow hwnd

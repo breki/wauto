@@ -9,7 +9,6 @@ open Microsoft.Win32
 
 type VirtualDesktopId = Guid
 
-
 let virtualDesktopIdsFromRegistry () : VirtualDesktopId [] =
     use key =
         Registry.CurrentUser.OpenSubKey(
@@ -75,6 +74,9 @@ module internal CLSIDs =
     let VirtualDesktopNotificationService =
         Guid("a501fdec-4a09-464c-ae4e-1b9c21b84918")
 
+    let VirtualDesktopPinnedApps =
+        Guid("B5A399E7-1C87-46B8-88E9-FC5747B171BD")
+
 [<ComImport;
   InterfaceType(ComInterfaceType.InterfaceIsIUnknown);
   Guid("6d5140c1-7436-11ce-8034-00aa006009fa")>]
@@ -99,6 +101,9 @@ type internal IObjectArray =
   InterfaceType(ComInterfaceType.InterfaceIsIInspectable);
   Guid("372e1d3b-38d3-42e4-a15b-8ab2b178f513")>]
 type internal IApplicationView =
+    abstract GetAppUserModelId :
+        [<MarshalAs(UnmanagedType.LPWStr)>] out: outref<string> -> int
+
     abstract SetFocus : unit -> int
     abstract SwitchTo : unit -> int
 // Other methods omitted
@@ -112,6 +117,33 @@ type internal IApplicationViewCollection =
     abstract GetViewsByAppUserModelId : string * byref<IObjectArray> -> int
     abstract GetViewForHwnd : IntPtr * outref<IApplicationView> -> int
 // Other methods omitted
+
+let internal getApplicationView
+    (hwnd: IntPtr)
+    (applicationViewCollection: IApplicationViewCollection)
+    =
+    let result, applicationView =
+        applicationViewCollection.GetViewForHwnd(hwnd)
+
+    if result <> 0 then
+        invalidOp "getApplicationView failed"
+
+    applicationView
+
+let internal getAppId
+    (hwnd: IntPtr)
+    (applicationViewCollection: IApplicationViewCollection)
+    =
+    let appView =
+        applicationViewCollection
+        |> getApplicationView hwnd
+
+    let result, appId = appView.GetAppUserModelId()
+
+    if result <> 0 then
+        invalidOp "getApplicationView failed"
+
+    appId
 
 [<ComImport;
   InterfaceType(ComInterfaceType.InterfaceIsIUnknown);
@@ -174,6 +206,19 @@ type internal IVirtualDesktopNotificationService =
     abstract Register : byref<IVirtualDesktopNotification> -> int
     abstract Unregister : int -> unit
 
+
+[<ComImport;
+  InterfaceType(ComInterfaceType.InterfaceIsIUnknown);
+  Guid("4CE81583-1E4C-4632-A621-07A53543148F")>]
+type internal IVirtualDesktopPinnedApps =
+    abstract IsAppIdPinned : string -> bool
+    abstract PinAppID : string -> unit
+    abstract UnpinAppID : string -> unit
+    abstract IsViewPinned : IApplicationView -> bool
+    abstract PinView : IApplicationView -> unit
+    abstract UnpinView : IApplicationView -> unit
+
+
 type Desktop
     internal
     (
@@ -195,8 +240,8 @@ type Desktop
     member this.Id = desktop.GetId()
     member this.Name = desktopName
 
-    member this.MoveWindowTo(hWnd: IntPtr) =
-        match applicationViewCollection.GetViewForHwnd(hWnd) with
+    member this.MoveWindowTo(hwnd: IntPtr) =
+        match applicationViewCollection.GetViewForHwnd(hwnd) with
         | 0, view -> manager.MoveViewToDesktop(view, desktop)
         | _ -> ()
 
@@ -207,7 +252,8 @@ type Manager
     (
         manager: IVirtualDesktopManager,
         managerInternal: IVirtualDesktopManagerInternal,
-        applicationViewCollection: IApplicationViewCollection
+        applicationViewCollection: IApplicationViewCollection,
+        pinnedApps: IVirtualDesktopPinnedApps
     ) as self =
 
     let mutable desktops: Map<VirtualDesktopId, Desktop> = Map.empty
@@ -228,7 +274,7 @@ type Manager
         | 0, desktopId when desktopId = VirtualDesktopId.Empty -> None
         | 0, desktopId -> desktops.[desktopId] |> Some
         | _, _ -> None
-        
+
     member this.ListDesktops() =
         let rawDesktops = managerInternal.GetDesktops()
 
@@ -251,6 +297,23 @@ type Manager
 
                 yield desktop
         }
+
+    member this.PinApplication(hwnd: IntPtr) =
+        let appId =
+            applicationViewCollection |> getAppId hwnd
+
+        pinnedApps.PinAppID(appId)
+
+    member this.PinWindow(hwnd: IntPtr) : unit =
+        match hwnd with
+        | hwnd when hwnd = IntPtr.Zero -> invalidArg "hwnd" "hwnd is null"
+        | _ ->
+            let appView =
+                applicationViewCollection
+                |> getApplicationView hwnd
+
+            pinnedApps.PinView appView
+
 
 let createVirtualDesktopsManager () =
     let shell =
@@ -278,12 +341,21 @@ let createVirtualDesktopsManager () =
     let applicationViewCollection =
         shell.QueryService(&serviceGuid, &riid) :?> IApplicationViewCollection
 
-    serviceGuid <- CLSIDs.VirtualDesktopNotificationService
-    riid <- typeof<IVirtualDesktopNotificationService>.GUID
+    serviceGuid <- CLSIDs.VirtualDesktopPinnedApps
+    riid <- typeof<IVirtualDesktopPinnedApps>.GUID
+
+    let pinnedApps =
+        shell.QueryService(&serviceGuid, &riid) :?> IVirtualDesktopPinnedApps
 
     // if we ever need notifications, use this code
-//    let notificationService =
+//    serviceGuid <- CLSIDs.VirtualDesktopNotificationService
+//    riid <- typeof<IVirtualDesktopNotificationService>.GUID
+
+    //    let notificationService =
 //        shell.QueryService(&serviceGuid, &riid)
 //        :?> IVirtualDesktopNotificationService
 
-    Manager(manager, managerInternal, applicationViewCollection)
+    Manager(manager, managerInternal, applicationViewCollection, pinnedApps)
+
+
+let virtualDesktopsManager = createVirtualDesktopsManager ()

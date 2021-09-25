@@ -7,6 +7,7 @@ open System.Windows.Forms
 open Wautoma.KeyboardHandling
 open Wautoma.KeysTypes
 open Wautoma.Settings
+open Wautoma.VirtualDesktops
 
 let wautomaVersion () =
     Assembly.GetExecutingAssembly().GetName().Version
@@ -19,7 +20,6 @@ let logActivityIntoTextBox (loggingTextBox: TextBox) msg : unit =
 
     loggingTextBox.Invoke(MethodInvoker(logFunc))
     |> ignore
-
 
 type AppForm(hotkeys: Hotkeys) as this =
     inherit Form()
@@ -79,6 +79,7 @@ type AppForm(hotkeys: Hotkeys) as this =
         this.Show()
         this.WindowState <- FormWindowState.Normal
         this.ShowInTaskbar <- true
+        virtualDesktopsManager.PinWindow(this.Handle)
 
     let hideLogWindow () =
         this.WindowState <- FormWindowState.Minimized
@@ -185,9 +186,12 @@ type AppForm(hotkeys: Hotkeys) as this =
 
     override this.OnLoad _ = hideLogWindow ()
 
-    override this.OnClosing e =
-        e.Cancel <- true
-        hideLogWindow ()
+    override this.OnFormClosing e =
+        match e.CloseReason with
+        | CloseReason.UserClosing ->
+            e.Cancel <- true
+            hideLogWindow ()
+        | _ -> ()
 
     override this.Dispose disposing =
         (keyboardHandler :> IDisposable).Dispose()

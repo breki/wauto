@@ -13,8 +13,6 @@ open Wautoma.UIAutomation.Mouse
 open Wautoma.VirtualDesktops
 
 
-let virtualDesktopsManager = createVirtualDesktopsManager ()
-
 let goToChromeTab tabName (loggingFunc: LoggingFunc) : unit =
     let chromeMaybe =
         allMainWindows ()
@@ -88,7 +86,17 @@ let openWindowsTerminal (_: LoggingFunc) : unit =
 let openWindowsExplorer _ = "explorer.exe" |> runProgram
 
 
-let switchToDesktop desktopNumber (_: LoggingFunc) =
+let switchToDesktop desktopNumber (loggingFunc: LoggingFunc) =
+    let taskbarMaybe =
+        allMainWindows ()
+        |> Seq.tryFind (nameIs "Taskbar")
+
+    match taskbarMaybe with
+    // this is a hack that should (hopefully) solve the problem with
+    // apps sometimes flashing in the taskbar after the desktop switch
+    | Some taskbar -> taskbar |> activate |> ignore
+    | None -> "Taskbar not found" |> loggingFunc
+
     let desktop =
         virtualDesktopsManager.ListDesktops()
         |> Seq.toList
@@ -106,6 +114,20 @@ let dumpAllWindows (loggingFunc: LoggingFunc) =
         (fun el ->
             $"%s{el.Current.Name} | {el.Current.ClassName}"
             |> loggingFunc)
+
+    loggingFunc "-------------"
+
+
+// todo igor: remove if not needed
+let dumpAllWindows2 (loggingFunc: LoggingFunc) =
+    loggingFunc ""
+    loggingFunc "Dumping all open windows:"
+
+    //    WindowList.WindowList.allWindows ()
+//    |> Seq.iter
+//        (fun el ->
+//            $"%s{el.Current.Name} | {el.Current.ClassName}"
+//            |> loggingFunc)
 
     loggingFunc "-------------"
 
@@ -155,8 +177,13 @@ let hotkeys: Hotkeys =
       { Keys = KeyCombo.Parse("Win+Num4")
         Action = switchToDesktop 4
         Description = "Switch to desktop 4" }
-      { Keys = KeyCombo.Parse("Shift+Win+Num9")
+      { Keys = KeyCombo.Parse("Win+Num9")
         Action = dumpAllWindows
-        Description = "Dump all currently open windows to the log" } ]
+        Description = "Dump all currently open windows to the log" }
+      // todo igor: remove if not needed
+//      { Keys = KeyCombo.Parse("Win+Num8")
+//        Action = dumpAllWindows2
+//        Description = "Dump all currently open windows to the log" }
+      ]
     |> List.map (fun x -> x.Keys, x)
     |> Map.ofSeq

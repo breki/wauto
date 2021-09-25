@@ -1,8 +1,6 @@
 ﻿open System
-open System.Threading
 open System.Windows.Forms
 open Wautoma.UIStuff
-open Wautoma.Async
 open Wautoma.MyHotkeys
 open Wautoma.UIAutomation.Processes
 

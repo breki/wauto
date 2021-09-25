@@ -102,6 +102,10 @@ type KeyboardHandler(hotkeys: Hotkeys, loggingFunc: LoggingFunc) =
                     else
                         allKeysDepressedEvent.Reset() |> ignore
 
+                    match currentlyPressedKeys.KeyCode with
+                    | Some _ -> mainKeysDepressedEvent.Reset() |> ignore
+                    | None -> mainKeysDepressedEvent.Set() |> ignore
+
                     if newKeystroke then
                         match hotkeys.TryFind currentlyPressedKeys, suspended with
                         | Some hotkey, false ->

@@ -5,9 +5,14 @@ open Wautoma.Logging
 
 
 let allKeysDepressedEvent = new ManualResetEvent(false)
+let mainKeysDepressedEvent = new ManualResetEvent(false)
 
 let waitForAllKeysToBeDepressed () =
     allKeysDepressedEvent.WaitOne(10 * 1000) |> ignore
+
+let waitForMainKeysToBeDepressed () =
+    mainKeysDepressedEvent.WaitOne(10 * 1000)
+    |> ignore
 
 
 let safeAction action logActivity =

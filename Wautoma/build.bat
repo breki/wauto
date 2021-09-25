@@ -1,6 +1,6 @@
 @ECHO OFF
 
-SET VERSION=1.2.0.0
+SET VERSION=1.4.0.0
 
 dotnet clean --configuration Release || GOTO :error
 dotnet build --configuration Release /p:Version=%VERSION%^
