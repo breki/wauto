@@ -267,7 +267,8 @@ type Manager
         managerInternal: IVirtualDesktopManagerInternal,
         managerInternal2: IVirtualDesktopManagerInternal2,
         applicationViewCollection: IApplicationViewCollection,
-        pinnedApps: IVirtualDesktopPinnedApps
+        pinnedApps: IVirtualDesktopPinnedApps,
+        notificationService: IVirtualDesktopNotificationService
     ) as self =
 
     let mutable desktops: Map<VirtualDesktopId, Desktop> = Map.empty
@@ -369,19 +370,18 @@ let createVirtualDesktopsManager () =
             shell
             CLSIDs.VirtualDesktopPinnedApps
 
-    // if we ever need notifications, use this code
-//    serviceGuid <- CLSIDs.VirtualDesktopNotificationService
-//    riid <- typeof<IVirtualDesktopNotificationService>.GUID
-    //    let notificationService =
-//        shell.QueryService(&serviceGuid, &riid)
-//        :?> IVirtualDesktopNotificationService
+    let notificationService =
+        createService<IVirtualDesktopNotificationService>
+            shell
+            CLSIDs.VirtualDesktopNotificationService
 
     Manager(
         manager,
         managerInternal,
         managerInternal2,
         applicationViewCollection,
-        pinnedApps
+        pinnedApps,
+        notificationService
     )
 
 
