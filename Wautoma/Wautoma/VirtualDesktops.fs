@@ -330,6 +330,14 @@ type Manager
             pinnedApps.PinView appView
 
 
+let internal createService<'TService>
+    (shell: IServiceProvider10)
+    serviceGuid
+    : 'TService =
+    let mutable servGuid = serviceGuid
+    let mutable riid = typeof<'TService>.GUID
+    shell.QueryService(&servGuid, &riid) :?> 'TService
+
 let createVirtualDesktopsManager () =
     let shell =
         Activator.CreateInstance(Type.GetTypeFromCLSID(CLSIDs.ImmersiveShell))
@@ -341,33 +349,25 @@ let createVirtualDesktopsManager () =
         )
         :?> IVirtualDesktopManager
 
-    let mutable serviceGuid = CLSIDs.VirtualDesktopManagerInternal
-
-    let mutable riid =
-        typeof<IVirtualDesktopManagerInternal>.GUID
-
     let managerInternal =
-        shell.QueryService(&serviceGuid, &riid)
-        :?> IVirtualDesktopManagerInternal
-
-    serviceGuid <- CLSIDs.VirtualDesktopManagerInternal
-    riid <- typeof<IVirtualDesktopManagerInternal2>.GUID
+        createService<IVirtualDesktopManagerInternal>
+            shell
+            CLSIDs.VirtualDesktopManagerInternal
 
     let managerInternal2 =
-        shell.QueryService(&serviceGuid, &riid)
-        :?> IVirtualDesktopManagerInternal2
-
-    serviceGuid <- typeof<IApplicationViewCollection>.GUID
-    riid <- typeof<IApplicationViewCollection>.GUID
+        createService<IVirtualDesktopManagerInternal2>
+            shell
+            CLSIDs.VirtualDesktopManagerInternal
 
     let applicationViewCollection =
-        shell.QueryService(&serviceGuid, &riid) :?> IApplicationViewCollection
-
-    serviceGuid <- CLSIDs.VirtualDesktopPinnedApps
-    riid <- typeof<IVirtualDesktopPinnedApps>.GUID
+        createService<IApplicationViewCollection>
+            shell
+            typeof<IApplicationViewCollection>.GUID
 
     let pinnedApps =
-        shell.QueryService(&serviceGuid, &riid) :?> IVirtualDesktopPinnedApps
+        createService<IVirtualDesktopPinnedApps>
+            shell
+            CLSIDs.VirtualDesktopPinnedApps
 
     // if we ever need notifications, use this code
 //    serviceGuid <- CLSIDs.VirtualDesktopNotificationService
