@@ -164,10 +164,22 @@ type internal IVirtualDesktopManager =
 [<ComImport;
   InterfaceType(ComInterfaceType.InterfaceIsIUnknown);
   Guid("f31574d6-b682-4cdc-bd56-1827860abec6")>]
-// Unfortunately the "Internal" in its name is no joke, it's not documented,
-// but see for example https://github.com/MScholtes/PSVirtualDesktop
-// and https://github.com/nathannelson97/VirtualDesktopGridSwitcher
 type internal IVirtualDesktopManagerInternal =
+    abstract GetCount : unit -> int
+    abstract MoveViewToDesktop : IApplicationView * IVirtualDesktop -> unit
+    abstract CanViewMoveDesktops : IApplicationView -> unit
+    abstract GetCurrentDesktop : unit -> IVirtualDesktop
+    abstract GetDesktops : unit -> IObjectArray
+    abstract GetAdjacentDesktop : IVirtualDesktop -> int -> IVirtualDesktop
+    abstract SwitchDesktop : desktop: IVirtualDesktop -> unit
+    abstract CreateDesktopW : unit -> IVirtualDesktop
+    abstract RemoveDesktop : IVirtualDesktop -> IVirtualDesktop -> unit
+    abstract FindDesktop : inref<VirtualDesktopId> -> IVirtualDesktop
+
+[<ComImport;
+  InterfaceType(ComInterfaceType.InterfaceIsIUnknown);
+  Guid("0F3A72B0-4566-487E-9A33-4ED302F6D6CE")>]
+type internal IVirtualDesktopManagerInternal2 =
     abstract GetCount : unit -> int
     abstract MoveViewToDesktop : IApplicationView * IVirtualDesktop -> unit
     abstract CanViewMoveDesktops : IApplicationView -> unit
@@ -223,6 +235,7 @@ type Desktop
     internal
     (
         manager: IVirtualDesktopManagerInternal,
+        manager2: IVirtualDesktopManagerInternal2,
         desktop: IVirtualDesktop,
         applicationViewCollection: IApplicationViewCollection,
         desktopOrdinalNumber
@@ -252,6 +265,7 @@ type Manager
     (
         manager: IVirtualDesktopManager,
         managerInternal: IVirtualDesktopManagerInternal,
+        managerInternal2: IVirtualDesktopManagerInternal2,
         applicationViewCollection: IApplicationViewCollection,
         pinnedApps: IVirtualDesktopPinnedApps
     ) as self =
@@ -290,6 +304,7 @@ type Manager
                 let desktop =
                     Desktop(
                         managerInternal,
+                        managerInternal2,
                         nativeDesktop,
                         applicationViewCollection,
                         desktopOrdinalNumber
@@ -335,6 +350,13 @@ let createVirtualDesktopsManager () =
         shell.QueryService(&serviceGuid, &riid)
         :?> IVirtualDesktopManagerInternal
 
+    serviceGuid <- CLSIDs.VirtualDesktopManagerInternal
+    riid <- typeof<IVirtualDesktopManagerInternal2>.GUID
+
+    let managerInternal2 =
+        shell.QueryService(&serviceGuid, &riid)
+        :?> IVirtualDesktopManagerInternal2
+
     serviceGuid <- typeof<IApplicationViewCollection>.GUID
     riid <- typeof<IApplicationViewCollection>.GUID
 
@@ -350,12 +372,17 @@ let createVirtualDesktopsManager () =
     // if we ever need notifications, use this code
 //    serviceGuid <- CLSIDs.VirtualDesktopNotificationService
 //    riid <- typeof<IVirtualDesktopNotificationService>.GUID
-
     //    let notificationService =
 //        shell.QueryService(&serviceGuid, &riid)
 //        :?> IVirtualDesktopNotificationService
 
-    Manager(manager, managerInternal, applicationViewCollection, pinnedApps)
+    Manager(
+        manager,
+        managerInternal,
+        managerInternal2,
+        applicationViewCollection,
+        pinnedApps
+    )
 
 
 let virtualDesktopsManager = createVirtualDesktopsManager ()
