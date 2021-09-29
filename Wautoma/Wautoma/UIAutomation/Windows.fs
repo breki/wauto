@@ -3,6 +3,7 @@
 open System
 open System.Runtime.InteropServices
 open System.Windows.Automation
+open Wautoma.Logging
 open Wautoma.NativeApi
 
 let allChildren =
@@ -69,8 +70,10 @@ let getWindowPattern (el: AutomationElement) : WindowPattern option =
             el.GetCurrentPattern(WindowPattern.Pattern) :?> WindowPattern
 
         if windowPattern.WaitForInputIdle(10000) then
+            //            log "some windowPattern"
             Some windowPattern
         else
+            //            log "None windowPattern"
             None
     with
     | :? InvalidOperationException -> None
@@ -81,8 +84,10 @@ let getWindowPlacement handle =
         WINDOWPLACEMENT(length = Marshal.SizeOf(typeof<WINDOWPLACEMENT>))
 
     if GetWindowPlacement(handle, &placement) then
+        //        log "getWindowPlacement got something"
         Some placement
     else
+        //        log "getWindowPlacement got nothing"
         None
 
 let getAutoElementWindowPlacement
@@ -112,9 +117,11 @@ let setWindowState (windowPattern: WindowPattern) state : unit =
         ()
 
 let maximizeWindow (windowPattern: WindowPattern) =
+    log "maximizeWindow()"
     setWindowState windowPattern WindowVisualState.Maximized
 
 let setWindowToNormal (windowPattern: WindowPattern) =
+    log "setWindowToNormal()"
     setWindowState windowPattern WindowVisualState.Normal
 
 let activate (el: AutomationElement) : AutomationElement =
@@ -122,10 +129,14 @@ let activate (el: AutomationElement) : AutomationElement =
     |> Option.map getWindowPlacementShowCommandAndFlags
     |> function
         | Some (cmd, flags) when cmd = ShowWindowCommand.Minimized ->
+            log $"got %A{cmd} and %A{flags}"
+
             let windowFunc =
                 if flags &&& WindowPlacementFlags.RestoreToMaximized = WindowPlacementFlags.RestoreToMaximized then
+                    log "maximizeWindow"
                     maximizeWindow
                 else
+                    log "setWindowToNormal"
                     setWindowToNormal
 
             el
@@ -134,7 +145,18 @@ let activate (el: AutomationElement) : AutomationElement =
             |> ignore
 
             el
-        | _ -> el
+        | Some (cmd, flags) ->
+            log $"got %A{cmd} and %A{flags}"
+            // todo now: remove this after debugging
+            el
+            |> getWindowPattern
+            |> Option.map setWindowToNormal
+            |> ignore
+
+            el
+        | None ->
+            log "got None"
+            el
 
 let focus (el: AutomationElement) : AutomationElement =
     el.SetFocus()

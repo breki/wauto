@@ -231,6 +231,18 @@ type internal IVirtualDesktopPinnedApps =
     abstract UnpinView : IApplicationView -> unit
 
 
+type VirtualDesktopNotification() =
+    interface IVirtualDesktopNotification with
+        member this.VirtualDesktopCreated desktop = ()
+        member this.VirtualDesktopDestroyBegin desktopA desktopB = ()
+        member this.VirtualDesktopDestroyFailed desktopA desktopB = ()
+        member this.VirtualDesktopDestroyed desktopA desktopB = ()
+        member this.ViewVirtualDesktopChanged applicationView = ()
+
+        member this.CurrentVirtualDesktopChanged desktopA desktopB =
+            Logging.log "CurrentVirtualDesktopChanged"
+
+
 type Desktop
     internal
     (
@@ -273,11 +285,19 @@ type Manager
 
     let mutable desktops: Map<VirtualDesktopId, Desktop> = Map.empty
 
+    //    let mutable notification: IVirtualDesktopNotification =
+//        VirtualDesktopNotification() :> IVirtualDesktopNotification
+
     do
         desktops <-
             self.ListDesktops()
             |> Seq.map (fun (desktop: Desktop) -> desktop.Id, desktop)
             |> Map.ofSeq
+
+    // this fails for some reason
+//        let registrationId =
+//            notificationService.Register &notification
+//            |> ignore
 
     member this.GetCurrentDesktop() =
         let virtualDesktop = managerInternal.GetCurrentDesktop()

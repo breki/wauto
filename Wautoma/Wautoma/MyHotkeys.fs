@@ -11,6 +11,7 @@ open Wautoma.UIAutomation.Misc
 open Wautoma.UIAutomation.Keyboard
 open Wautoma.UIAutomation.Mouse
 open Wautoma.VirtualDesktops
+open Wautoma.UIStuff
 
 
 let goToChromeTab tabName (loggingFunc: LoggingFunc) : unit =
@@ -87,15 +88,17 @@ let openWindowsExplorer _ = "explorer.exe" |> runProgram
 
 
 let switchToDesktop desktopNumber (loggingFunc: LoggingFunc) =
-    let taskbarMaybe =
-        allMainWindows ()
-        |> Seq.tryFind (nameIs "Taskbar")
+    showWautomaForm ()
 
-    match taskbarMaybe with
+    let anchorAppMaybe =
+        allMainWindows ()
+        |> Seq.tryFind (nameStartsWith "Wautoma")
+
+    match anchorAppMaybe with
     // this is a hack that should (hopefully) solve the problem with
     // apps sometimes flashing in the taskbar after the desktop switch
-    | Some taskbar -> taskbar |> activate |> ignore
-    | None -> "Taskbar not found" |> loggingFunc
+    | Some anchorApp -> anchorApp |> activate |> focus |> ignore
+    | None -> "Anchor app not found" |> loggingFunc
 
     let desktop =
         virtualDesktopsManager.ListDesktops()
@@ -104,6 +107,7 @@ let switchToDesktop desktopNumber (loggingFunc: LoggingFunc) =
 
     desktop.SwitchTo()
 
+    hideWautomaForm ()
 
 let dumpAllWindows (loggingFunc: LoggingFunc) =
     loggingFunc ""
