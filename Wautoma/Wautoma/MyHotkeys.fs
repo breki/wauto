@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.Threading
 open Wautoma.Async
 open Wautoma.KeysTypes
 open Wautoma.Logging
@@ -41,7 +42,7 @@ let openNotepadPlusPlus (_: LoggingFunc) : unit =
     | Some notepad -> notepad |> activate |> focus |> ignore
     | None -> runProgram "notepad++.exe"
 
-let openFm (_: LoggingFunc) : unit =
+let openFman (_: LoggingFunc) : unit =
     let appFormMaybe =
         allMainWindows () |> Seq.tryFind (nameIs "fman")
 
@@ -87,27 +88,27 @@ let openWindowsTerminal (_: LoggingFunc) : unit =
 let openWindowsExplorer _ = "explorer.exe" |> runProgram
 
 
-let switchToDesktop desktopNumber (loggingFunc: LoggingFunc) =
-    showWautomaForm ()
+let desktopSwitchAllowedSignal = new ManualResetEvent(true)
 
-    let anchorAppMaybe =
-        allMainWindows ()
-        |> Seq.tryFind (nameStartsWith "Wautoma")
+let switchToDesktop desktopNumber (_: LoggingFunc) =
+    desktopSwitchAllowedSignal.WaitOne(10000)
+    |> ignore
 
-    match anchorAppMaybe with
-    // this is a hack that should (hopefully) solve the problem with
-    // apps sometimes flashing in the taskbar after the desktop switch
-    | Some anchorApp -> anchorApp |> activate |> focus |> ignore
-    | None -> "Anchor app not found" |> loggingFunc
+    desktopSwitchAllowedSignal.Reset() |> ignore
 
-    let desktop =
-        virtualDesktopsManager.ListDesktops()
-        |> Seq.toList
-        |> List.item (desktopNumber - 1)
+    try
+        let formState = showWautomaFormForSwitching ()
 
-    desktop.SwitchTo()
+        let desktop =
+            virtualDesktopsManager.ListDesktops()
+            |> Seq.toList
+            |> List.item (desktopNumber - 1)
 
-    hideWautomaForm ()
+        desktop.SwitchTo()
+
+        hideWautomaFormForSwitching formState
+    finally
+        desktopSwitchAllowedSignal.Set() |> ignore
 
 let dumpAllWindows (loggingFunc: LoggingFunc) =
     loggingFunc ""
@@ -164,8 +165,8 @@ let hotkeys: Hotkeys =
         Action = hibernate
         Description = "Hibernate" }
       { Keys = KeyCombo.Parse("Win+E")
-        Action = openFm
-        Description = "Open fm" }
+        Action = openFman
+        Description = "Open fman" }
       { Keys = KeyCombo.Parse("Shift+Win+E")
         Action = openWindowsExplorer
         Description = "Open Windows Explorer" }

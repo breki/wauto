@@ -147,12 +147,6 @@ let activate (el: AutomationElement) : AutomationElement =
             el
         | Some (cmd, flags) ->
             log $"got %A{cmd} and %A{flags}"
-            // todo now: remove this after debugging
-            el
-            |> getWindowPattern
-            |> Option.map setWindowToNormal
-            |> ignore
-
             el
         | None ->
             log "got None"

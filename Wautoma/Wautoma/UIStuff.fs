@@ -4,7 +4,6 @@ open System
 open System.Drawing
 open System.Reflection
 open System.Windows.Forms
-open System.Windows.Threading
 open Wautoma.KeyboardHandling
 open Wautoma.KeysTypes
 open Wautoma.Logging
@@ -23,11 +22,15 @@ let logActivityIntoTextBox (loggingTextBox: TextBox) msg : unit =
     loggingTextBox.Invoke(MethodInvoker(logFunc))
     |> ignore
 
+type WautomaFormState = bool * FormWindowState
 
-let mutable showWautomaForm: unit -> unit = (fun () -> ())
-let mutable hideWautomaForm: unit -> unit = (fun () -> ())
+let mutable showWautomaFormForSwitching: unit -> WautomaFormState =
+    (fun () -> true, FormWindowState.Normal)
 
-type XXX = delegate of unit -> unit
+let mutable hideWautomaFormForSwitching: WautomaFormState -> unit =
+    (fun _ -> ())
+
+type UnitDelegate = delegate of unit -> unit
 
 type AppForm(hotkeys: Hotkeys) as this =
     inherit Form()
@@ -83,25 +86,22 @@ type AppForm(hotkeys: Hotkeys) as this =
 
         this.Controls.Add(loggingTextBox)
 
-    let showLogWindow _ _ =
-        let f: XXX =
-            XXX
-                (fun () ->
-                    this.Show()
-                    this.WindowState <- FormWindowState.Normal
-                    this.ShowInTaskbar <- true
-                    virtualDesktopsManager.PinWindow(this.Handle))
+    let invoke func =
+        this.Invoke(UnitDelegate func) |> ignore
 
-        this.Invoke f |> ignore
+    let showLogWindow _ _ =
+        invoke
+            (fun () ->
+                this.Show()
+                this.WindowState <- FormWindowState.Normal
+                this.ShowInTaskbar <- true
+                virtualDesktopsManager.PinWindow(this.Handle))
 
     let hideLogWindow () =
-        let f: XXX =
-            XXX
-                (fun () ->
-                    this.WindowState <- FormWindowState.Minimized
-                    this.Hide())
-
-        this.Invoke f |> ignore
+        invoke
+            (fun () ->
+                this.WindowState <- FormWindowState.Minimized
+                this.Hide())
 
     let showLogWindowOnLeftClick obj (args: MouseEventArgs) =
         if args.Button &&& MouseButtons.Left = MouseButtons.Left then
@@ -198,8 +198,22 @@ type AppForm(hotkeys: Hotkeys) as this =
         createLoggingTextBox ()
         createTaskbarIcon icon
 
-        showWautomaForm <- fun () -> showLogWindow null EventArgs.Empty
-        hideWautomaForm <- hideLogWindow
+        showWautomaFormForSwitching <-
+            fun () ->
+                let existingState = this.Visible, this.WindowState
+
+                this.Opacity <- 0.
+                this.Show()
+                this.WindowState <- FormWindowState.Normal
+                virtualDesktopsManager.PinWindow(this.Handle)
+                existingState
+
+        hideWautomaFormForSwitching <-
+            fun (showForm, windowState) ->
+                this.Opacity <- 1.
+                this.Visible <- showForm
+                this.WindowState <- windowState
+
 
         keyboardHandler.Start()
 
