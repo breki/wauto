@@ -9,6 +9,7 @@ open Wautoma.KeysTypes
 open Wautoma.Logging
 open Wautoma.Settings
 open Wautoma.VirtualDesktops
+open Wautoma.UIAutomation.Windows
 
 let wautomaVersion () =
     Assembly.GetExecutingAssembly().GetName().Version
@@ -218,6 +219,15 @@ type AppForm(hotkeys: Hotkeys) as this =
                         this.Show()
                         this.WindowState <- FormWindowState.Normal
                         virtualDesktopsManager.PinWindow(this.Handle)
+
+                        let wautomaMaybe =
+                            allMainWindows ()
+                            |> Seq.tryFind (nameStartsWith "Wautoma")
+
+                        match wautomaMaybe with
+                        | Some app -> app |> activate |> focus |> ignore
+                        | None -> ()
+
                         existingState)
 
         hideWautomaFormForSwitching <-

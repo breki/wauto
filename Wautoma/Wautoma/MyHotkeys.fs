@@ -99,6 +99,11 @@ let switchToDesktop desktopNumber (_: LoggingFunc) =
     try
         let formState = showWautomaFormForSwitching ()
 
+        // note: this pause is needed to allow the OS enough time to unfocus
+        // the existing window before switching desktops. Otherwise a taskbar
+        // flashing occurs.
+        Thread.Sleep(100)
+
         let desktop =
             virtualDesktopsManager.ListDesktops()
             |> Seq.toList
