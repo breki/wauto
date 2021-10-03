@@ -31,6 +31,8 @@ let mutable hideWautomaFormForSwitching: WautomaFormState -> unit =
     (fun _ -> ())
 
 type UnitDelegate = delegate of unit -> unit
+type DelegateWithResult<'TResult> = delegate of unit -> 'TResult
+type DelegateWithParameter<'TParam> = delegate of 'TParam -> unit
 
 type AppForm(hotkeys: Hotkeys) as this =
     inherit Form()
@@ -86,19 +88,27 @@ type AppForm(hotkeys: Hotkeys) as this =
 
         this.Controls.Add(loggingTextBox)
 
-    let invoke func =
+    let invokeUnitFunc func =
         this.Invoke(UnitDelegate func) |> ignore
 
+    let invokeFuncWithResult (func: unit -> 'TResult) =
+        this.Invoke(DelegateWithResult<'TResult> func) :?> 'TResult
+
+    let invokeFuncWithParam (func: 'TParam -> unit) (param: 'TParam) =
+        this.Invoke(DelegateWithParameter<'TParam> func, param)
+        |> ignore
+
     let showLogWindow _ _ =
-        invoke
+        invokeUnitFunc
             (fun () ->
                 this.Show()
                 this.WindowState <- FormWindowState.Normal
                 this.ShowInTaskbar <- true
+                this.Opacity <- 1.
                 virtualDesktopsManager.PinWindow(this.Handle))
 
     let hideLogWindow () =
-        invoke
+        invokeUnitFunc
             (fun () ->
                 this.WindowState <- FormWindowState.Minimized
                 this.Hide())
@@ -200,19 +210,26 @@ type AppForm(hotkeys: Hotkeys) as this =
 
         showWautomaFormForSwitching <-
             fun () ->
-                let existingState = this.Visible, this.WindowState
+                invokeFuncWithResult
+                    (fun () ->
+                        let existingState = this.Visible, this.WindowState
 
-                this.Opacity <- 0.
-                this.Show()
-                this.WindowState <- FormWindowState.Normal
-                virtualDesktopsManager.PinWindow(this.Handle)
-                existingState
+                        this.Opacity <- 0.
+                        this.Show()
+                        this.WindowState <- FormWindowState.Normal
+                        virtualDesktopsManager.PinWindow(this.Handle)
+                        existingState)
 
         hideWautomaFormForSwitching <-
-            fun (showForm, windowState) ->
-                this.Opacity <- 1.
-                this.Visible <- showForm
-                this.WindowState <- windowState
+            fun (existingState: WautomaFormState) ->
+                let hideFunc =
+                    fun (existingState: WautomaFormState) ->
+                        let showForm, windowState = existingState
+                        this.Visible <- showForm
+                        this.WindowState <- windowState
+                        this.Opacity <- 1.
+
+                invokeFuncWithParam hideFunc existingState
 
 
         keyboardHandler.Start()

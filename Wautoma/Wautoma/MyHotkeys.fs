@@ -122,20 +122,6 @@ let dumpAllWindows (loggingFunc: LoggingFunc) =
 
     loggingFunc "-------------"
 
-
-// todo igor: remove if not needed
-let dumpAllWindows2 (loggingFunc: LoggingFunc) =
-    loggingFunc ""
-    loggingFunc "Dumping all open windows:"
-
-    //    WindowList.WindowList.allWindows ()
-//    |> Seq.iter
-//        (fun el ->
-//            $"%s{el.Current.Name} | {el.Current.ClassName}"
-//            |> loggingFunc)
-
-    loggingFunc "-------------"
-
 let hotkeys: Hotkeys =
     [ { Keys = KeyCombo.Parse("Win+Shift+G")
         Action = goToChromeTab "gmail"
@@ -184,11 +170,6 @@ let hotkeys: Hotkeys =
         Description = "Switch to desktop 4" }
       { Keys = KeyCombo.Parse("Win+Num9")
         Action = dumpAllWindows
-        Description = "Dump all currently open windows to the log" }
-      // todo igor: remove if not needed
-//      { Keys = KeyCombo.Parse("Win+Num8")
-//        Action = dumpAllWindows2
-//        Description = "Dump all currently open windows to the log" }
-      ]
+        Description = "Dump all currently open windows to the log" } ]
     |> List.map (fun x -> x.Keys, x)
     |> Map.ofSeq
