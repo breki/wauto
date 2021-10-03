@@ -5,6 +5,7 @@ open System.Runtime.InteropServices
 open System.Windows.Automation
 open Wautoma.Logging
 open Wautoma.NativeApi
+open Wautoma.VirtualDesktops
 
 let allChildren =
     TreeScope.Children, Condition.TrueCondition
@@ -90,16 +91,19 @@ let getWindowPlacement handle =
         //        log "getWindowPlacement got nothing"
         None
 
-let getAutoElementWindowPlacement
-    (el: AutomationElement)
-    : WINDOWPLACEMENT option =
+
+let elementWindowHandle (el: AutomationElement) =
     let winHandleInt =
         el.GetCurrentPropertyValue(AutomationElement.NativeWindowHandleProperty)
         :?> int
 
-    let winHandle = winHandleInt |> IntPtr.op_Explicit
+    winHandleInt |> IntPtr.op_Explicit
 
-    getWindowPlacement winHandle
+
+let getAutoElementWindowPlacement
+    (el: AutomationElement)
+    : WINDOWPLACEMENT option =
+    el |> elementWindowHandle |> getWindowPlacement
 
 let getWindowPlacementShowCommandAndFlags
     (windowPlacement: WINDOWPLACEMENT)
@@ -154,4 +158,10 @@ let activate (el: AutomationElement) : AutomationElement =
 
 let focus (el: AutomationElement) : AutomationElement =
     el.SetFocus()
+    el
+
+
+let makeSticky (el: AutomationElement) : AutomationElement =
+    let handle = el |> elementWindowHandle
+    virtualDesktopsManager.PinWindow handle
     el

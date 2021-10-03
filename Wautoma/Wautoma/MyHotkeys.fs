@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Threading
+open System.Windows.Automation
 open Wautoma.Async
 open Wautoma.KeysTypes
 open Wautoma.Logging
@@ -33,22 +34,60 @@ let goToChromeTab tabName (loggingFunc: LoggingFunc) : unit =
     | None -> ()
 
 
-let openNotepadPlusPlus (_: LoggingFunc) : unit =
-    let notepadMaybe =
+let findOrOpenAppByWindow
+    (findCriteria: AutomationElement -> bool)
+    (programExe: string)
+    (makeAppSticky: bool)
+    =
+    let findApp () =
         allMainWindows ()
-        |> Seq.tryFind (nameEndsWith "Notepad++")
+        |> Seq.tryFind findCriteria
+        |> Option.map (fun app -> app |> activate |> focus)
 
-    match notepadMaybe with
-    | Some notepad -> notepad |> activate |> focus |> ignore
-    | None -> runProgram "notepad++.exe"
+    findApp ()
+    |> function
+        | None ->
+            runProgram programExe
+            Thread.Sleep(2000)
+
+            findApp ()
+            |> function
+                | Some app when makeAppSticky -> app |> makeSticky |> ignore
+                | _ -> ()
+        | Some _ -> ()
+
+
+let findOrOpenAppByProcess
+    (processName: string)
+    (programExe: string)
+    (makeAppSticky: bool)
+    =
+    let findApp () =
+        let processes = allProcessesWithName processName
+
+        Array.tryHead processes
+        |> function
+            | Some prcs -> windowOfProcess prcs.Id
+            | None -> None
+        |> Option.map (fun app -> app |> activate |> focus)
+
+    findApp ()
+    |> function
+        | None ->
+            runProgram programExe
+            Thread.Sleep(2000)
+
+            findApp ()
+            |> function
+                | Some app when makeAppSticky -> app |> makeSticky |> ignore
+                | _ -> ()
+        | Some _ -> ()
+
+let openNotepadPlusPlus (_: LoggingFunc) : unit =
+    findOrOpenAppByWindow (nameEndsWith "Notepad++") "notepad++.exe" true
 
 let openFman (_: LoggingFunc) : unit =
-    let appFormMaybe =
-        allMainWindows () |> Seq.tryFind (nameIs "fman")
-
-    match appFormMaybe with
-    | Some appForm -> appForm |> activate |> focus |> ignore
-    | None ->
+    let programExe =
         let appDataDir =
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
 
@@ -56,16 +95,11 @@ let openFman (_: LoggingFunc) : unit =
             [| appDataDir
                @"Microsoft\Windows\Start Menu\Programs\fman.lnk" |]
         )
-        |> runProgram
+
+    findOrOpenAppByWindow (nameIs "fman") programExe true
 
 let openFoobar2000 (_: LoggingFunc) : unit =
-    let appFormMaybe =
-        allMainWindows ()
-        |> Seq.tryFind (nameEndsWith "[foobar2000]")
-
-    match appFormMaybe with
-    | Some appForm -> appForm |> activate |> focus |> ignore
-    | None ->
+    let programExe =
         let programFilesDir =
             Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)
 
@@ -73,17 +107,11 @@ let openFoobar2000 (_: LoggingFunc) : unit =
             [| programFilesDir
                @"foobar2000\foobar2000.exe" |]
         )
-        |> runProgram
+
+    findOrOpenAppByWindow (nameEndsWith "[foobar2000]") programExe true
 
 let openWindowsTerminal (_: LoggingFunc) : unit =
-    let wtProcesses = allProcessesWithName "WindowsTerminal"
-
-    match Array.tryHead wtProcesses with
-    | Some wtProcess ->
-        windowOfProcess wtProcess.Id
-        |> Option.map (fun el -> el |> activate |> focus)
-        |> ignore
-    | None -> "wt.exe" |> runProgram
+    findOrOpenAppByProcess "WindowsTerminal" "wt.exe" true
 
 let openWindowsExplorer _ = "explorer.exe" |> runProgram
 
