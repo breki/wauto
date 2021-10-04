@@ -108,7 +108,7 @@ let openFoobar2000 (_: LoggingFunc) : unit =
                @"foobar2000\foobar2000.exe" |]
         )
 
-    findOrOpenAppByWindow (nameEndsWith "[foobar2000]") programExe true
+    findOrOpenAppByWindow (nameContains "foobar2000") programExe true
 
 let openWindowsTerminal (_: LoggingFunc) : unit =
     findOrOpenAppByProcess "WindowsTerminal" "wt.exe" true
