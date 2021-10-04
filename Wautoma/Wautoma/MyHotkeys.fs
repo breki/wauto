@@ -89,12 +89,11 @@ let openNotepadPlusPlus (_: LoggingFunc) : unit =
 let openFman (_: LoggingFunc) : unit =
     let programExe =
         let appDataDir =
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData
+            )
 
-        Path.Combine(
-            [| appDataDir
-               @"Microsoft\Windows\Start Menu\Programs\fman.lnk" |]
-        )
+        Path.Combine([| appDataDir; @"fman\fman.exe" |])
 
     findOrOpenAppByWindow (nameIs "fman") programExe true
 
