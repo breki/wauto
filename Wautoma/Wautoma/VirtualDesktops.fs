@@ -122,13 +122,16 @@ let internal getApplicationView
     (hwnd: IntPtr)
     (applicationViewCollection: IApplicationViewCollection)
     =
-    let result, applicationView =
-        applicationViewCollection.GetViewForHwnd(hwnd)
+    try
+        let result, applicationView =
+            applicationViewCollection.GetViewForHwnd(hwnd)
 
-    if result <> 0 then
-        invalidOp "getApplicationView failed"
+        if result <> 0 then
+            invalidOp "getApplicationView failed"
 
-    applicationView
+        applicationView
+    with
+    | :? COMException as ex -> invalidOp "getApplicationView failed"
 
 let internal getAppId
     (hwnd: IntPtr)
