@@ -36,6 +36,7 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Content Include="icon.pdn" />
+        <Content Include="VersionHistory.txt" />
         <None Include="App.config" />
     </ItemGroup>
 

@@ -119,7 +119,7 @@ let openWindowsExplorer _ = "explorer.exe" |> runProgram
 
 let desktopSwitchAllowedSignal = new ManualResetEvent(true)
 
-let switchToDesktop desktopNumber (log: LoggingFunc) =
+let switchToDesktop desktopNumber (_: LoggingFunc) =
     desktopSwitchAllowedSignal.WaitOne(10000)
     |> ignore
 
@@ -142,7 +142,7 @@ let switchToDesktop desktopNumber (log: LoggingFunc) =
         // note: this pause is needed to allow the OS enough time to unfocus
         // the existing window before switching desktops. Otherwise a taskbar
         // flashing occurs.
-        Thread.Sleep(100)
+        Thread.Sleep(250)
 
         let desktop =
             virtualDesktopsManager.ListDesktops()
@@ -151,6 +151,8 @@ let switchToDesktop desktopNumber (log: LoggingFunc) =
 
         desktop.SwitchTo()
 
+        Thread.Sleep(250)
+
         hideWautomaFormForSwitching formState
 
         match desktopFocusedElements.TryFind(desktopNumber) with
@@ -158,6 +160,7 @@ let switchToDesktop desktopNumber (log: LoggingFunc) =
         | None -> ()
 
     finally
+        Thread.Sleep(250)
         desktopSwitchAllowedSignal.Set() |> ignore
 
 let dumpAllWindows (loggingFunc: LoggingFunc) =
@@ -190,7 +193,7 @@ let hotkeys: Hotkeys =
         Description = "Open Notepad++" }
       { Keys = KeyCombo.Parse("Win+W")
         Action = openFoobar2000
-        Description = "Open foobar2000" }
+        Description = "Open Windows Terminal" }
       { Keys = KeyCombo.Parse("Win+C")
         Action = openWindowsTerminal
         Description = "Open foobar2000" }
