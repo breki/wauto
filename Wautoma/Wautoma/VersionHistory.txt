@@ -1,2 +1,5 @@
-﻿1.11.0.0
+﻿1.12.0.0
+- ignores tries to switch to the same desktop number
+
+1.11.0.0
 - additional pauses when switching desktops, I'm not sure if they help

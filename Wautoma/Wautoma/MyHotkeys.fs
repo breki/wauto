@@ -119,48 +119,51 @@ let openWindowsExplorer _ = "explorer.exe" |> runProgram
 
 let desktopSwitchAllowedSignal = new ManualResetEvent(true)
 
-let switchToDesktop desktopNumber (_: LoggingFunc) =
+let switchToDesktop desktopNumber (log: LoggingFunc) =
     desktopSwitchAllowedSignal.WaitOne(10000)
     |> ignore
 
     desktopSwitchAllowedSignal.Reset() |> ignore
 
-    let focusedEl = AutomationElement.FocusedElement
-
-    let currentDesktopNumber =
-        virtualDesktopsManager.CurrentDesktopNumber()
-
-    desktopFocusedElements <-
-        desktopFocusedElements.Change(
-            currentDesktopNumber,
-            (fun _ -> Some focusedEl)
-        )
-
     try
-        let formState = showWautomaFormForSwitching ()
+        let currentDesktopNumber =
+            virtualDesktopsManager.CurrentDesktopNumber()
 
-        // note: this pause is needed to allow the OS enough time to unfocus
-        // the existing window before switching desktops. Otherwise a taskbar
-        // flashing occurs.
-        Thread.Sleep(250)
+        if currentDesktopNumber <> desktopNumber then
+            let focusedEl = AutomationElement.FocusedElement
 
-        let desktop =
-            virtualDesktopsManager.ListDesktops()
-            |> Seq.toList
-            |> List.item (desktopNumber - 1)
+            desktopFocusedElements <-
+                desktopFocusedElements.Change(
+                    currentDesktopNumber,
+                    (fun _ -> Some focusedEl)
+                )
 
-        desktop.SwitchTo()
+            let formState = showWautomaFormForSwitching ()
 
-        Thread.Sleep(250)
+            // note: this pause is needed to allow the OS enough time to
+            // unfocus the existing window before switching desktops. Otherwise
+            // a taskbar flashing occurs.
+            Thread.Sleep(250)
 
-        hideWautomaFormForSwitching formState
+            let desktop =
+                virtualDesktopsManager.ListDesktops()
+                |> Seq.toList
+                |> List.item (desktopNumber - 1)
 
-        match desktopFocusedElements.TryFind(desktopNumber) with
-        | Some el -> el |> activate |> focus |> ignore
-        | None -> ()
+            desktop.SwitchTo()
 
+            Thread.Sleep(250)
+
+            hideWautomaFormForSwitching formState
+
+            match desktopFocusedElements.TryFind(desktopNumber) with
+            | Some el -> el |> activate |> focus |> ignore
+            | None -> ()
+
+            Thread.Sleep(250)
+        else
+            ()
     finally
-        Thread.Sleep(250)
         desktopSwitchAllowedSignal.Set() |> ignore
 
 let dumpAllWindows (loggingFunc: LoggingFunc) =
