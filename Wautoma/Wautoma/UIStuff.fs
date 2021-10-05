@@ -215,9 +215,15 @@ type AppForm(hotkeys: Hotkeys) as this =
                     (fun () ->
                         let existingState = this.Visible, this.WindowState
 
+                        logActivityIntoTextBox
+                            this.LoggingTextBox
+                            $"ShowOnSwitch form.Visible=%A{this.Visible}"
+
                         this.Opacity <- 0.
+                        this.ShowInTaskbar <- false
                         this.Show()
                         this.WindowState <- FormWindowState.Normal
+
                         virtualDesktopsManager.PinWindow(this.Handle)
 
                         let wautomaMaybe =
@@ -235,8 +241,12 @@ type AppForm(hotkeys: Hotkeys) as this =
                 let hideFunc =
                     fun (existingState: WautomaFormState) ->
                         let showForm, windowState = existingState
-                        this.Visible <- showForm
-                        this.WindowState <- windowState
+
+                        if showForm then
+                            this.WindowState <- windowState
+                        else
+                            this.Visible <- false
+
                         this.Opacity <- 1.
 
                 invokeFuncWithParam hideFunc existingState
@@ -253,6 +263,10 @@ type AppForm(hotkeys: Hotkeys) as this =
         | CloseReason.UserClosing ->
             e.Cancel <- true
             hideLogWindow ()
+
+            logActivityIntoTextBox
+                this.LoggingTextBox
+                $"OnFormClosing form.Visible=%A{this.Visible}"
         | _ -> ()
 
     override this.Dispose disposing =

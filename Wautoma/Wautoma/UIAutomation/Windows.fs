@@ -72,6 +72,13 @@ let nameContains text (el: AutomationElement) =
 
     name.Contains(text)
 
+let classNameIs text (el: AutomationElement) =
+    let name =
+        el.GetCurrentPropertyValue(AutomationElement.ClassNameProperty)
+        |> string
+
+    name = text
+
 let getWindowPattern (el: AutomationElement) : WindowPattern option =
     try
         let windowPattern =

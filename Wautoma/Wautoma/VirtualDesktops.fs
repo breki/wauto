@@ -129,24 +129,22 @@ let internal getApplicationView
         if result <> 0 then
             invalidOp "getApplicationView failed"
 
-        applicationView
+        Some applicationView
     with
-    | :? COMException as ex -> invalidOp "getApplicationView failed"
+    | :? COMException as ex -> None
 
 let internal getAppId
     (hwnd: IntPtr)
     (applicationViewCollection: IApplicationViewCollection)
     =
-    let appView =
-        applicationViewCollection
-        |> getApplicationView hwnd
+    applicationViewCollection
+    |> getApplicationView hwnd
+    |> function
+        | Some appView ->
+            let result, appId = appView.GetAppUserModelId()
 
-    let result, appId = appView.GetAppUserModelId()
-
-    if result <> 0 then
-        invalidOp "getApplicationView failed"
-
-    appId
+            if result <> 0 then None else Some appId
+        | None -> None
 
 [<ComImport;
   InterfaceType(ComInterfaceType.InterfaceIsIUnknown);
@@ -346,20 +344,21 @@ type Manager
         }
 
     member this.PinApplication(hwnd: IntPtr) =
-        let appId =
-            applicationViewCollection |> getAppId hwnd
-
-        pinnedApps.PinAppID(appId)
+        applicationViewCollection
+        |> getAppId hwnd
+        |> function
+            | Some appId -> pinnedApps.PinAppID(appId)
+            | None -> ()
 
     member this.PinWindow(hwnd: IntPtr) : unit =
         match hwnd with
         | hwnd when hwnd = IntPtr.Zero -> invalidArg "hwnd" "hwnd is null"
         | _ ->
-            let appView =
-                applicationViewCollection
-                |> getApplicationView hwnd
-
-            pinnedApps.PinView appView
+            applicationViewCollection
+            |> getApplicationView hwnd
+            |> function
+                | Some appView -> pinnedApps.PinView appView
+                | None -> ()
 
 
 let internal createService<'TService>

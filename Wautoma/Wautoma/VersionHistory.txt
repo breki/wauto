@@ -1,5 +1,6 @@
 ﻿1.12.0.0
-- ignores tries to switch to the same desktop number
+- ignores attempts to switch to the same desktop number
+- Working on increasing robustness of the desktop switching.
 
 1.11.0.0
 - additional pauses when switching desktops, I'm not sure if they help

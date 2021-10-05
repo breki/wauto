@@ -138,6 +138,14 @@ let switchToDesktop desktopNumber (log: LoggingFunc) =
                     (fun _ -> Some focusedEl)
                 )
 
+//            allMainWindows ()
+//            |> Seq.tryFind (classNameIs "Shell_TrayWnd")
+//            |> Option.map
+//                (fun app ->
+//                    app |> activate |> ignore
+//                    "activating Shell_TrayWnd" |> log)
+//            |> ignore
+
             let formState = showWautomaFormForSwitching ()
 
             // note: this pause is needed to allow the OS enough time to
