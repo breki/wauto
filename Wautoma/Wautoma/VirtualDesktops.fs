@@ -313,6 +313,14 @@ type Manager
         | 0, desktopId -> desktops.[desktopId] |> Some
         | _, _ -> None
 
+    member this.CurrentDesktopNumber() =
+        let currentDesktopId = this.GetCurrentDesktop().Id
+
+        this.ListDesktops()
+        |> Seq.toList
+        |> List.findIndex (fun desktop -> desktop.Id = currentDesktopId)
+        |> (+) 1
+
     member this.ListDesktops() =
         let rawDesktops = managerInternal.GetDesktops()
 

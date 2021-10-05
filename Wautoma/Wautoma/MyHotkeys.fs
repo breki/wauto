@@ -15,6 +15,8 @@ open Wautoma.UIAutomation.Mouse
 open Wautoma.VirtualDesktops
 open Wautoma.UIStuff
 
+let mutable desktopFocusedElements: Map<int, AutomationElement> = Map.empty
+
 
 let goToChromeTab tabName (loggingFunc: LoggingFunc) : unit =
     let chromeMaybe =
@@ -117,11 +119,22 @@ let openWindowsExplorer _ = "explorer.exe" |> runProgram
 
 let desktopSwitchAllowedSignal = new ManualResetEvent(true)
 
-let switchToDesktop desktopNumber (_: LoggingFunc) =
+let switchToDesktop desktopNumber (log: LoggingFunc) =
     desktopSwitchAllowedSignal.WaitOne(10000)
     |> ignore
 
     desktopSwitchAllowedSignal.Reset() |> ignore
+
+    let focusedEl = AutomationElement.FocusedElement
+
+    let currentDesktopNumber =
+        virtualDesktopsManager.CurrentDesktopNumber()
+
+    desktopFocusedElements <-
+        desktopFocusedElements.Change(
+            currentDesktopNumber,
+            (fun _ -> Some focusedEl)
+        )
 
     try
         let formState = showWautomaFormForSwitching ()
@@ -139,6 +152,11 @@ let switchToDesktop desktopNumber (_: LoggingFunc) =
         desktop.SwitchTo()
 
         hideWautomaFormForSwitching formState
+
+        match desktopFocusedElements.TryFind(desktopNumber) with
+        | Some el -> el |> activate |> focus |> ignore
+        | None -> ()
+
     finally
         desktopSwitchAllowedSignal.Set() |> ignore
 

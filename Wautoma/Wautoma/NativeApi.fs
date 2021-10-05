@@ -105,3 +105,9 @@ extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr child, string className, 
 
 [<DllImport("User32")>]
 extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, Int32& lpdwProcessId)
+
+[<DllImport("user32.dll", CharSet = CharSet.Auto)>]
+extern bool SetForegroundWindow(nativeint hWnd)
+
+[<DllImport("user32.dll")>]
+extern IntPtr SetFocus(IntPtr hwnd)

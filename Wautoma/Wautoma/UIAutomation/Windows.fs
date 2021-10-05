@@ -164,7 +164,20 @@ let activate (el: AutomationElement) : AutomationElement =
             el
 
 let focus (el: AutomationElement) : AutomationElement =
-    el.SetFocus()
+    try
+        el.SetFocus()
+    with
+    | :? InvalidOperationException as ex ->
+        $"Could not set focus on window %s{el.Current.Name}, "
+        + $"reason: %s{ex.Message}"
+        |> log
+
+        let handle = el |> elementWindowHandle
+        SetForegroundWindow handle |> ignore
+        SetFocus handle |> ignore
+
+    | :? ElementNotAvailableException -> ()
+
     el
 
 
