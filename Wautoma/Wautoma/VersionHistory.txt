@@ -1,4 +1,9 @@
-﻿1.13.0.0
+﻿1.14.0.0
+- log now includes date and time.
+- logging is now limited to 200 lines.
+- log should now display the latest lines, although this can be flaky. 
+ 
+1.13.0.0
 - VirtualDesktopManager is now accessed via a wrapper to make the app more 
     robust.
 

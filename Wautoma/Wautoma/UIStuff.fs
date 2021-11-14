@@ -18,7 +18,26 @@ type EventHandlerFunc = obj -> EventArgs -> unit
 
 let logActivityIntoTextBox (loggingTextBox: TextBox) msg : unit =
     let logFunc () =
-        loggingTextBox.AppendText(msg + Environment.NewLine)
+        loggingTextBox.AppendText(
+            DateTime.Now.ToString("[MM-dd HH:mm:ss] ")
+            + msg
+            + Environment.NewLine
+        )
+
+        let maxLines = 200
+
+        if loggingTextBox.Lines.Length > maxLines then
+            let croppedLog: string [] =
+                Array.sub
+                    loggingTextBox.Lines
+                    (loggingTextBox.Lines.Length - maxLines)
+                    maxLines
+
+            loggingTextBox.Lines <- croppedLog
+
+        if loggingTextBox.Visible then
+            loggingTextBox.SelectionStart <- loggingTextBox.Text.Length
+            loggingTextBox.ScrollToCaret()
 
     loggingTextBox.Invoke(MethodInvoker(logFunc))
     |> ignore
@@ -86,6 +105,15 @@ type AppForm(hotkeys: Hotkeys) as this =
         loggingTextBox.ReadOnly <- true
         loggingTextBox.Dock <- DockStyle.Fill
         loggingTextBox.ScrollBars <- ScrollBars.Vertical
+
+        let moveCursorToEnd _ _ =
+            if loggingTextBox.Visible then
+                loggingTextBox.SelectionStart <- loggingTextBox.Text.Length
+                loggingTextBox.ScrollToCaret()
+                loggingTextBox.Refresh()
+
+        EventHandler moveCursorToEnd
+        |> loggingTextBox.VisibleChanged.AddHandler
 
         this.Controls.Add(loggingTextBox)
 
