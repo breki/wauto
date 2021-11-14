@@ -1,4 +1,6 @@
-﻿1.12.0.0
+﻿1.13.0.0
+
+1.12.0.0
 - ignores attempts to switch to the same desktop number
 - Working on increasing robustness of the desktop switching.
 

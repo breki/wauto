@@ -12,6 +12,7 @@
         <Compile Include="UI automation.fs" />
         <Compile Include="Working with settings.fs" />
         <Compile Include="Virtual desktops exploratory tests.fs" />
+        <Compile Include="Keyboard shortcuts to SendKeys string.fs" />
     </ItemGroup>
 
     <ItemGroup>

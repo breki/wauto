@@ -19,6 +19,7 @@
         <Compile Include="Async.fs" />
         <Compile Include="Settings.fs" />
         <Compile Include="NativeApi.fs" />
+        <Compile Include="SendInputBindings.fs" />
         <Compile Include="VirtualDesktops.fs" />
         <Compile Include="KeysNames.fs" />
         <Compile Include="KeysTypes.fs" />
@@ -30,6 +31,8 @@
         <Compile Include="KeyboardHandling.fs" />
         <Compile Include="UIStuff.fs" />
         <Compile Include="MyHotkeys.fs" />
+        <Compile Include="Experimental\Keystroke.fs" />
+        <Compile Include="Experimental\Native.fs" />
         <Compile Include="Program.fs" />
         <Content Include=".fantomasignore" />
         <Content Include="icon.ico">

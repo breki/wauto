@@ -140,6 +140,54 @@ type KeyCombo =
 
         s.ToString()
 
+    member this.ToSendKeysString() =
+        let s = StringBuilder()
+
+        let mutable mainKeys = []
+        let mutable ctrlSymbolAdded = false
+
+        if (this.Modifiers &&& ModifierKeys.WindowsKey)
+           <> ModifierKeys.None then
+            s.Append("^") |> ignore
+            ctrlSymbolAdded <- true
+            mainKeys <- [ "{ESC}" ]
+
+        if (this.Modifiers &&& ModifierKeys.Shift)
+           <> ModifierKeys.None then
+            s.Append("+") |> ignore
+
+        if (this.Modifiers &&& ModifierKeys.Control)
+           <> ModifierKeys.None
+           && not ctrlSymbolAdded then
+            s.Append("^") |> ignore
+
+        if (this.Modifiers &&& ModifierKeys.Alt)
+           <> ModifierKeys.None then
+            s.Append("%") |> ignore
+
+        let keyCodeToString (keyCode: VirtualKeyCode) : string =
+            sendKeysNames.[keyCode |> uint |> int]
+
+        let keyCodeStr =
+            this.KeyCode |> Option.map keyCodeToString
+
+        match keyCodeStr with
+        | Some keyCodeStr -> mainKeys <- keyCodeStr :: mainKeys
+        | None -> invalidOp "This key combination is not supported by SendKeys."
+
+        mainKeys
+        |> List.rev
+        |> function
+            | [ singleKey ] -> s.Append singleKey |> ignore
+            | keys ->
+                let keysTogether = keys |> String.concat ""
+                s.Append('(') |> ignore
+                s.Append(keysTogether) |> ignore
+                s.Append(')') |> ignore
+
+        s.ToString()
+
+
 
 type HotkeyAction = Logged
 
