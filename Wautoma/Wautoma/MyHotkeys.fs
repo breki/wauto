@@ -127,7 +127,8 @@ let switchToDesktop desktopNumber (log: LoggingFunc) =
 
     try
         let currentDesktopNumber =
-            virtualDesktopsManager.CurrentDesktopNumber()
+            virtualDesktopManagerWrapper()
+                .CurrentDesktopNumber()
 
         if currentDesktopNumber <> desktopNumber then
             let focusedEl = AutomationElement.FocusedElement
@@ -138,7 +139,7 @@ let switchToDesktop desktopNumber (log: LoggingFunc) =
                     (fun _ -> Some focusedEl)
                 )
 
-//            allMainWindows ()
+            //            allMainWindows ()
 //            |> Seq.tryFind (classNameIs "Shell_TrayWnd")
 //            |> Option.map
 //                (fun app ->
@@ -154,7 +155,7 @@ let switchToDesktop desktopNumber (log: LoggingFunc) =
             Thread.Sleep(250)
 
             let desktop =
-                virtualDesktopsManager.ListDesktops()
+                virtualDesktopManagerWrapper().ListDesktops()
                 |> Seq.toList
                 |> List.item (desktopNumber - 1)
 

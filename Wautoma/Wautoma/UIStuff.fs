@@ -106,7 +106,9 @@ type AppForm(hotkeys: Hotkeys) as this =
                 this.WindowState <- FormWindowState.Normal
                 this.ShowInTaskbar <- true
                 this.Opacity <- 1.
-                virtualDesktopsManager.PinWindow(this.Handle))
+
+                virtualDesktopManagerWrapper()
+                    .PinWindow(this.Handle))
 
     let hideLogWindow () =
         invokeUnitFunc
@@ -224,7 +226,8 @@ type AppForm(hotkeys: Hotkeys) as this =
                         this.Show()
                         this.WindowState <- FormWindowState.Normal
 
-                        virtualDesktopsManager.PinWindow(this.Handle)
+                        virtualDesktopManagerWrapper()
+                            .PinWindow(this.Handle)
 
                         let wautomaMaybe =
                             allMainWindows ()

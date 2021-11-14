@@ -1,4 +1,6 @@
 ﻿1.13.0.0
+- VirtualDesktopManager is now accessed via a wrapper to make the app more 
+    robust.
 
 1.12.0.0
 - ignores attempts to switch to the same desktop number

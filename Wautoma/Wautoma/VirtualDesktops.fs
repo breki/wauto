@@ -415,4 +415,16 @@ let createVirtualDesktopsManager () =
     )
 
 
-let virtualDesktopsManager = createVirtualDesktopsManager ()
+// todo now: rename to a private variable
+let mutable virtualDesktopsManager = createVirtualDesktopsManager ()
+
+let virtualDesktopManagerWrapper () =
+    try
+        virtualDesktopsManager.GetCurrentDesktop()
+        |> ignore
+
+        virtualDesktopsManager
+    with
+    | :? COMException as ex ->
+        virtualDesktopsManager <- createVirtualDesktopsManager ()
+        virtualDesktopsManager

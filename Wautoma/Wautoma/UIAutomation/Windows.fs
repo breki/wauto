@@ -193,5 +193,5 @@ let focus (el: AutomationElement) : AutomationElement =
 
 let makeSticky (el: AutomationElement) : AutomationElement =
     let handle = el |> elementWindowHandle
-    virtualDesktopsManager.PinWindow handle
+    virtualDesktopManagerWrapper().PinWindow handle
     el

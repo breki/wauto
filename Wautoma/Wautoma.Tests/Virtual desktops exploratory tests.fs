@@ -53,4 +53,4 @@ let ``pinning windows works`` () =
     let ``process`` = (allProcessesWithName "foobar2000").[0]
     let hwnd = ``process``.MainWindowHandle
     //    virtualDesktopsManager.PinApplication hwnd
-    virtualDesktopsManager.PinWindow hwnd
+    virtualDesktopManagerWrapper().PinWindow hwnd
