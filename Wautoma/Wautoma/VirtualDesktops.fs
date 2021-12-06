@@ -425,5 +425,14 @@ let virtualDesktopManagerWrapper () =
         _virtualDesktopsManager
     with
     | :? COMException as ex ->
+        Logging.log (
+            "_virtualDesktopsManager.GetCurrentDesktop() failed, "
+            + "creating new instance"
+        )
+
         _virtualDesktopsManager <- createVirtualDesktopsManager ()
+
+        Logging.log "new instance of virtualDesktopsManager created"
+
+
         _virtualDesktopsManager

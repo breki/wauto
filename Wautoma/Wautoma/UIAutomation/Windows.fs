@@ -143,6 +143,8 @@ let setWindowToNormal (windowPattern: WindowPattern) =
     setWindowState windowPattern WindowVisualState.Normal
 
 let activate (el: AutomationElement) : AutomationElement =
+    log "activate()"
+    
     getAutoElementWindowPlacement el
     |> Option.map getWindowPlacementShowCommandAndFlags
     |> function
@@ -171,6 +173,8 @@ let activate (el: AutomationElement) : AutomationElement =
             el
 
 let focus (el: AutomationElement) : AutomationElement =
+    log "focus()"
+    
     try
         el.SetFocus()
     with
@@ -192,6 +196,11 @@ let focus (el: AutomationElement) : AutomationElement =
 
 
 let makeSticky (el: AutomationElement) : AutomationElement =
+    log "--> makeSticky()"
+
     let handle = el |> elementWindowHandle
     virtualDesktopManagerWrapper().PinWindow handle
+
+    log "<-- makeSticky() "
+
     el

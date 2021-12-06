@@ -241,6 +241,8 @@ type AppForm(hotkeys: Hotkeys) as this =
 
         showWautomaFormForSwitching <-
             fun () ->
+                log "showWautomaFormForSwitching"
+                
                 invokeFuncWithResult
                     (fun () ->
                         let existingState = this.Visible, this.WindowState
@@ -269,6 +271,8 @@ type AppForm(hotkeys: Hotkeys) as this =
 
         hideWautomaFormForSwitching <-
             fun (existingState: WautomaFormState) ->
+                log "hideWautomaFormForSwitching"
+                
                 let hideFunc =
                     fun (existingState: WautomaFormState) ->
                         let showForm, windowState = existingState

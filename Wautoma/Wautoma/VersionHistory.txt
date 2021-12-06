@@ -1,4 +1,18 @@
-﻿1.14.0.0
+﻿1.17.0.0
+- more logging
+
+1.16.0.0
+- added more logging of desktopSwitchAllowedSignal activity to try to determine
+    why it is sometimes not set
+- added logging to findOrOpenAppByWindow
+
+1.15.0.0
+- added logging to virtualDesktopManagerWrapper() to try to detect why it
+    sometimes takes so long to switch desktops
+- added logging to findOrOpenAppByProcess() for more diagnostics
+- added more logging to other places
+
+1.14.0.0
 - log now includes date and time.
 - logging is now limited to 200 lines.
 - log should now display the latest lines, although this can be flaky. 
