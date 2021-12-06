@@ -49,6 +49,9 @@ let findOrOpenAppByWindow
     findApp ()
     |> function
         | None ->
+            log
+                $"App '%s{programExe}' not found, running it again and waiting for 2 seconds..."
+
             runProgram programExe
             Thread.Sleep(2000)
 
@@ -60,6 +63,7 @@ let findOrOpenAppByWindow
 
 
 let findOrOpenAppByProcess
+    (loggingFunc: LoggingFunc)
     (processName: string)
     (programExe: string)
     (makeAppSticky: bool)
@@ -69,14 +73,23 @@ let findOrOpenAppByProcess
 
         Array.tryHead processes
         |> function
-            | Some prcs -> windowOfProcess prcs.Id
+            | Some prcs ->
+                loggingFunc $"Found existing process %s{processName}"
+                windowOfProcess prcs.Id
             | None -> None
         |> Option.map (fun app -> app |> activate |> focus)
 
     findApp ()
     |> function
         | None ->
+            loggingFunc (
+                $"Not found existing process %s{processName}, "
+                + "launching a new instance..."
+            )
+
             runProgram programExe
+
+            loggingFunc "Waiting for two seconds for the app to get running..."
             Thread.Sleep(2000)
 
             findApp ()
@@ -111,8 +124,12 @@ let openFoobar2000 (_: LoggingFunc) : unit =
 
     findOrOpenAppByWindow (nameContains "foobar2000") programExe true
 
-let openWindowsTerminal (_: LoggingFunc) : unit =
-    findOrOpenAppByProcess "WindowsTerminal" "wt.exe" true
+let openWindowsTerminal (loggingFunc: LoggingFunc) : unit =
+    loggingFunc "--> openWindowsTerminal()"
+
+    findOrOpenAppByProcess loggingFunc "WindowsTerminal" "wt.exe" true
+
+    loggingFunc "<-- openWindowsTerminal()"
 
 let openWindowsExplorer _ = "explorer.exe" |> runProgram
 
@@ -120,9 +137,14 @@ let openWindowsExplorer _ = "explorer.exe" |> runProgram
 let desktopSwitchAllowedSignal = new ManualResetEvent(true)
 
 let switchToDesktop desktopNumber (log: LoggingFunc) =
-    desktopSwitchAllowedSignal.WaitOne(10000)
-    |> ignore
+    log "Waiting for desktopSwitchAllowedSignal..."
 
+    let waitResult =
+        desktopSwitchAllowedSignal.WaitOne(10000)
+
+    log $"Result of desktopSwitchAllowedSignal.WaitOne(): %A{waitResult}"
+
+    log "desktopSwitchAllowedSignal.Reset()"
     desktopSwitchAllowedSignal.Reset() |> ignore
 
     try
@@ -173,6 +195,7 @@ let switchToDesktop desktopNumber (log: LoggingFunc) =
         else
             ()
     finally
+        log "desktopSwitchAllowedSignal.Set()"
         desktopSwitchAllowedSignal.Set() |> ignore
 
 let dumpAllWindows (loggingFunc: LoggingFunc) =
@@ -205,10 +228,10 @@ let hotkeys: Hotkeys =
         Description = "Open Notepad++" }
       { Keys = KeyCombo.Parse("Win+W")
         Action = openFoobar2000
-        Description = "Open Windows Terminal" }
+        Description = "Open foobar2000" }
       { Keys = KeyCombo.Parse("Win+C")
         Action = openWindowsTerminal
-        Description = "Open foobar2000" }
+        Description = "Open Windows Terminal" }
       { Keys = KeyCombo.Parse("Win+J")
         Action = rightClick
         Description = "Right mouse click" }
