@@ -242,37 +242,44 @@ type AppForm(hotkeys: Hotkeys) as this =
         showWautomaFormForSwitching <-
             fun () ->
                 log "showWautomaFormForSwitching"
-                
-                invokeFuncWithResult
-                    (fun () ->
-                        let existingState = this.Visible, this.WindowState
 
-                        logActivityIntoTextBox
-                            this.LoggingTextBox
-                            $"ShowOnSwitch form.Visible=%A{this.Visible}"
+                let existingState =
+                    invokeFuncWithResult
+                        (fun () ->
+                            let existingState = this.Visible, this.WindowState
 
-                        this.Opacity <- 0.
-                        this.ShowInTaskbar <- false
-                        this.Show()
-                        this.WindowState <- FormWindowState.Normal
+                            logActivityIntoTextBox
+                                this.LoggingTextBox
+                                $"ShowOnSwitch form.Visible=%A{this.Visible}"
 
-                        virtualDesktopManagerWrapper()
-                            .PinWindow(this.Handle)
+                            this.Opacity <- 0.
+                            this.ShowInTaskbar <- false
+                            this.Show()
+                            this.WindowState <- FormWindowState.Normal
 
-                        let wautomaMaybe =
-                            allMainWindows ()
-                            |> Seq.tryFind (nameStartsWith "Wautoma")
+                            existingState)
 
-                        match wautomaMaybe with
-                        | Some app -> app |> activate |> focus |> ignore
-                        | None -> ()
+                virtualDesktopManagerWrapper()
+                    .PinWindow(this.Handle)
 
-                        existingState)
+                let wautomaMaybe =
+                    allMainWindows ()
+                    |> Seq.tryFind (nameStartsWith "Wautoma")
+
+                match wautomaMaybe with
+                | Some app -> app |> activate |> focus |> ignore
+                | None -> ()
+
+                log
+                    $"showWautomaFormForSwitching existingState=%A{existingState}"
+
+                existingState
 
         hideWautomaFormForSwitching <-
             fun (existingState: WautomaFormState) ->
-                log "hideWautomaFormForSwitching"
-                
+                log
+                    $"hideWautomaFormForSwitching existingState=%A{existingState}"
+
                 let hideFunc =
                     fun (existingState: WautomaFormState) ->
                         let showForm, windowState = existingState
