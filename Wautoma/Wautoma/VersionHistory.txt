@@ -1,3 +1,9 @@
+1.19.0.0
+- milliseconds are now logged, too
+- "switch to desktop" action is ignored if trying to switch to the same desktop
+- all thread sleeps are now logged
+- added more logging to the focus() function
+
 1.18.0.0
 - showWautomaFormForSwitching() function now has certain blocks moved outside
   of the invoke call 

@@ -16,6 +16,7 @@
 
     <ItemGroup>
         <Compile Include="Logging.fs" />
+        <Compile Include="Misc.fs" />
         <Compile Include="Async.fs" />
         <Compile Include="Settings.fs" />
         <Compile Include="NativeApi.fs" />

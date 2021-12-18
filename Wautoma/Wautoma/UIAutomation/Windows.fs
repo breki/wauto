@@ -144,7 +144,7 @@ let setWindowToNormal (windowPattern: WindowPattern) =
 
 let activate (el: AutomationElement) : AutomationElement =
     log "activate()"
-    
+
     getAutoElementWindowPlacement el
     |> Option.map getWindowPlacementShowCommandAndFlags
     |> function
@@ -173,8 +173,8 @@ let activate (el: AutomationElement) : AutomationElement =
             el
 
 let focus (el: AutomationElement) : AutomationElement =
-    log "focus()"
-    
+    log "--> focus()"
+
     try
         el.SetFocus()
     with
@@ -187,11 +187,14 @@ let focus (el: AutomationElement) : AutomationElement =
         | :? ElementNotAvailableException -> ()
 
         let handle = el |> elementWindowHandle
+        log "SetForegroundWindow()"
         SetForegroundWindow handle |> ignore
+        log "SetFocus()"
         SetFocus handle |> ignore
 
     | :? ElementNotAvailableException -> ()
 
+    log "<-- focus()"
     el
 
 

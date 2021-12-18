@@ -5,6 +5,7 @@ open System.IO
 open System.Threading
 open System.Windows.Automation
 open Wautoma.Async
+open Wautoma.Misc
 open Wautoma.KeysTypes
 open Wautoma.Logging
 open Wautoma.UIAutomation.Processes
@@ -53,7 +54,7 @@ let findOrOpenAppByWindow
                 $"App '%s{programExe}' not found, running it again and waiting for 2 seconds..."
 
             runProgram programExe
-            Thread.Sleep(2000)
+            wait 2000
 
             findApp ()
             |> function
@@ -90,7 +91,7 @@ let findOrOpenAppByProcess
             runProgram programExe
 
             loggingFunc "Waiting for two seconds for the app to get running..."
-            Thread.Sleep(2000)
+            wait 2000
 
             findApp ()
             |> function
@@ -137,22 +138,26 @@ let openWindowsExplorer _ = "explorer.exe" |> runProgram
 let desktopSwitchAllowedSignal = new ManualResetEvent(true)
 
 let switchToDesktop desktopNumber (log: LoggingFunc) =
-    log "Waiting for desktopSwitchAllowedSignal..."
+    let currentDesktopNumber =
+        virtualDesktopManagerWrapper()
+            .CurrentDesktopNumber()
 
-    let waitResult =
-        desktopSwitchAllowedSignal.WaitOne(10000)
+    if currentDesktopNumber <> desktopNumber then
+        log "Waiting for desktopSwitchAllowedSignal..."
 
-    log $"Result of desktopSwitchAllowedSignal.WaitOne(): %A{waitResult}"
+        let waitResult =
+            desktopSwitchAllowedSignal.WaitOne(10000)
 
-    log "desktopSwitchAllowedSignal.Reset()"
-    desktopSwitchAllowedSignal.Reset() |> ignore
+        log $"Result of desktopSwitchAllowedSignal.WaitOne(): %A{waitResult}"
 
-    try
-        let currentDesktopNumber =
-            virtualDesktopManagerWrapper()
-                .CurrentDesktopNumber()
+        log "desktopSwitchAllowedSignal.Reset()"
+        desktopSwitchAllowedSignal.Reset() |> ignore
 
-        if currentDesktopNumber <> desktopNumber then
+        try
+            let currentDesktopNumber =
+                virtualDesktopManagerWrapper()
+                    .CurrentDesktopNumber()
+
             let focusedEl = AutomationElement.FocusedElement
 
             desktopFocusedElements <-
@@ -162,21 +167,22 @@ let switchToDesktop desktopNumber (log: LoggingFunc) =
                 )
 
             //            allMainWindows ()
-//            |> Seq.tryFind (classNameIs "Shell_TrayWnd")
-//            |> Option.map
-//                (fun app ->
-//                    app |> activate |> ignore
-//                    "activating Shell_TrayWnd" |> log)
-//            |> ignore
+            //            |> Seq.tryFind (classNameIs "Shell_TrayWnd")
+            //            |> Option.map
+            //                (fun app ->
+            //                    app |> activate |> ignore
+            //                    "activating Shell_TrayWnd" |> log)
+            //            |> ignore
 
             let formState = showWautomaFormForSwitching ()
 
             // note: this pause is needed to allow the OS enough time to
             // unfocus the existing window before switching desktops. Otherwise
             // a taskbar flashing occurs.
-            Thread.Sleep(250)
+            wait 250
 
-            log "Manager.ListDesktops()"        
+            log "Manager.ListDesktops()"
+
             let desktop =
                 virtualDesktopManagerWrapper().ListDesktops()
                 |> Seq.toList
@@ -185,7 +191,7 @@ let switchToDesktop desktopNumber (log: LoggingFunc) =
             log "desktop.SwitchTo()"
             desktop.SwitchTo()
 
-            Thread.Sleep(250)
+            wait 250
 
             hideWautomaFormForSwitching formState
 
@@ -193,12 +199,10 @@ let switchToDesktop desktopNumber (log: LoggingFunc) =
             | Some el -> el |> activate |> focus |> ignore
             | None -> ()
 
-            Thread.Sleep(250)
-        else
-            ()
-    finally
-        log "desktopSwitchAllowedSignal.Set()"
-        desktopSwitchAllowedSignal.Set() |> ignore
+            wait 250
+        finally
+            log "desktopSwitchAllowedSignal.Set()"
+            desktopSwitchAllowedSignal.Set() |> ignore
 
 let dumpAllWindows (loggingFunc: LoggingFunc) =
     loggingFunc ""

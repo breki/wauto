@@ -19,7 +19,7 @@ type EventHandlerFunc = obj -> EventArgs -> unit
 let logActivityIntoTextBox (loggingTextBox: TextBox) msg : unit =
     let logFunc () =
         loggingTextBox.AppendText(
-            DateTime.Now.ToString("[MM-dd HH:mm:ss] ")
+            DateTime.Now.ToString("[MM-dd HH:mm:ss.fff] ")
             + msg
             + Environment.NewLine
         )
